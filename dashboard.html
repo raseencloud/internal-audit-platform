@@ -1,1 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA Platform – Internal Audit Excellence</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb; --primary-light: #3b82f6; --success: #22c55e;
+      --warning: #f59e0b; --danger: #ef4444; --info: #06b6d4;
+      --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
+      --card-bg: #ffffff; --body-bg: #f8fafc;
+      --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
+      --sidebar-width: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--body-bg); color: var(--text-main); overflow-x: hidden; }
+    .layout { display: flex; min-height: 100vh; }
 
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); color: #cbd5e1; display: flex; flex-direction: column; padding: 0; position: fixed; right: 0; top: 0; height: 100vh; z-index: 1000; transition: width 0.3s ease, transform 0.3s ease; }
+    .sidebar.collapsed { width: 70px; }
+    .sidebar.collapsed .sidebar-brand, .sidebar.collapsed .menu li span, .sidebar.collapsed .sidebar-footer div { display: none; }
+    .sidebar.collapsed .menu li { justify-content: center; padding: 12px; margin: 2px 8px; }
+    .sidebar.collapsed .menu li i { width: auto; font-size: 18px; }
+    .sidebar.collapsed .sidebar-header { justify-content: center; padding: 20px 0; }
+    .sidebar.collapsed .sidebar-footer { justify-content: center; padding: 16px 0; }
+    .sidebar-header { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; }
+    .sidebar-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+    .sidebar-brand h2 { font-size: 15px; color: #f8fafc; margin: 0; }
+    .sidebar-brand span { font-size: 10px; color: #94a3b8; }
+    .menu { list-style: none; padding: 8px 0; flex: 1; overflow-y: auto; }
+    .menu li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; position: relative; }
+    .menu li i { width: 20px; text-align: center; font-size: 15px; }
+    .menu li:hover { background: var(--sidebar-hover); color: #f8fafc; }
+    .menu li.active { background: var(--primary); color: #fff; }
+    .menu li.active::before { content: ''; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--primary-light); border-radius: 2px; }
+    .menu li small { font-size: 10px; color: #94a3b8; display: block; margin-top: 1px; }
+    .menu li.active small { color: rgba(255,255,255,0.7); }
+    .sidebar-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 10px; }
+    .sidebar-footer .avatar { width: 30px; height: 30px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+    .sidebar-bottom { border-top: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
+    .sidebar-bottom-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; font-size: 12px; color: #94a3b8; transition: all 0.2s; }
+    .sidebar-bottom-item:hover { color: #f8fafc; background: var(--sidebar-hover); }
+    .sidebar-bottom-item i { width: 20px; text-align: center; }
+    .sidebar.collapsed .sidebar-bottom-item { justify-content: center; padding: 8px; }
+    .sidebar.collapsed .sidebar-bottom-item span { display: none; }
+
+    /* MAIN */
+    .main { flex: 1; margin-right: var(--sidebar-width); padding: 0; min-height: 100vh; transition: margin-right 0.3s ease; }
+    .sidebar.collapsed ~ .main { margin-right: 70px; }
+
+    /* TOP BAR */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .top-bar-left { display: flex; align-items: center; gap: 16px; }
+    .menu-toggle { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-main); }
+    .search-box { position: relative; }
+    .search-box input { padding: 8px 36px 8px 12px; border: 1px solid var(--border); border-radius: 8px; width: 320px; font-size: 13px; background: #f1f5f9; }
+    .search-box input::placeholder { color: #94a3b8; }
+    .search-box i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; }
+    .search-shortcut { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #94a3b8; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; }
+    .top-bar-right { display: flex; align-items: center; gap: 12px; }
+    .top-btn { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; font-size: 12px; color: var(--text-main); transition: all 0.2s; }
+    .top-btn:hover { background: var(--body-bg); }
+    .top-btn i { font-size: 14px; }
+    .top-btn .label { display: flex; flex-direction: column; line-height: 1.2; }
+    .top-btn .label small { font-size: 10px; color: var(--text-muted); }
+    .top-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--body-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background 0.2s; border: 1px solid var(--border); }
+    .top-icon:hover { background: var(--border); }
+    .badge-count { position: absolute; top: -4px; left: -4px; background: var(--danger); color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .lang-switch { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 12px; color: var(--text-muted); }
+    .lang-switch:hover { background: var(--body-bg); }
+    .lang-switch i { font-size: 16px; }
+    .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
+    .user-profile:hover { background: var(--body-bg); }
+    .user-profile .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #475569, #64748b); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; overflow: hidden; }
+    .user-profile .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-info { text-align: right; }
+    .user-info .name { font-size: 13px; font-weight: 600; }
+    .user-info .role { font-size: 11px; color: var(--text-muted); }
+
+    /* CONTENT */
+    .content { padding: 20px 24px; }
+    .welcome-section { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .welcome-text h2 { font-size: 20px; margin: 0 0 4px; }
+    .welcome-text p { font-size: 13px; color: var(--text-muted); margin: 0; }
+    .date-display { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; background: var(--card-bg); border: 1px solid var(--border); font-size: 13px; }
+    .date-display i { color: var(--primary); }
+    .date-display .date-text { text-align: right; }
+    .date-display .date-text .ar { font-weight: 600; }
+    .date-display .date-text .en { font-size: 11px; color: var(--text-muted); }
+
+    /* KPI */
+    .kpi-section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .kpi-section-title small { font-size: 12px; color: var(--text-muted); font-weight: 400; display: block; margin-top: 2px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi-card { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--border); }
+    .kpi-card-inner { display: flex; align-items: flex-start; gap: 12px; }
+    .kpi-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .kpi-icon.blue { background: #dbeafe; color: var(--primary); }
+    .kpi-icon.green { background: #dcfce7; color: var(--success); }
+    .kpi-icon.orange { background: #fef3c7; color: var(--warning); }
+    .kpi-icon.red { background: #fee2e2; color: var(--danger); }
+    .kpi-icon.purple { background: #f3e8ff; color: #9333ea; }
+    .kpi-content { flex: 1; }
+    .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .kpi-label { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+    .kpi-label-en { font-size: 10px; color: #94a3b8; }
+    .kpi-progress { margin-top: 10px; }
+    .kpi-progress-bar { height: 4px; border-radius: 2px; background: #e2e8f0; overflow: hidden; }
+    .kpi-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .kpi-progress-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* GRIDS */
+    .section-grid-3 { display: grid; grid-template-columns: 1.4fr 1fr 1.1fr; gap: 16px; margin-bottom: 16px; }
+    .section-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .card-header h3 { font-size: 14px; margin: 0; }
+    .card-header .subtitle { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .card-header a { font-size: 12px; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .card-header a:hover { text-decoration: underline; }
+
+    /* TASKS */
+    .tasks-list { list-style: none; }
+    .tasks-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .tasks-list li:last-child { border-bottom: none; }
+    .tasks-list li:hover { background: #f8fafc; margin: 0 -12px; padding: 10px 12px; border-radius: 8px; }
+    .task-time { text-align: center; min-width: 40px; }
+    .task-time .time { font-size: 13px; font-weight: 600; }
+    .task-time .day { font-size: 10px; color: var(--text-muted); }
+    .task-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .task-icon.blue { background: #dbeafe; color: var(--primary); }
+    .task-icon.green { background: #dcfce7; color: var(--success); }
+    .task-icon.orange { background: #fef3c7; color: var(--warning); }
+    .task-icon.purple { background: #f3e8ff; color: #9333ea; }
+    .task-icon.teal { background: #ccfbf1; color: #0d9488; }
+    .task-info { flex: 1; }
+    .task-info .title { font-size: 13px; font-weight: 500; }
+    .task-info .subtitle { font-size: 11px; color: var(--text-muted); }
+    .task-badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 500; }
+    .badge-review { background: #dbeafe; color: var(--primary); }
+    .badge-approval { background: #dcfce7; color: var(--success); }
+    .badge-evidence { background: #fef3c7; color: var(--warning); }
+    .badge-meeting { background: #f3e8ff; color: #9333ea; }
+    .badge-followup { background: #ccfbf1; color: #0d9488; }
+    .task-code { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+    .task-arrow { color: #cbd5e1; font-size: 12px; }
+
+    /* ATTENTION */
+    .attention-list { list-style: none; }
+    .attention-list li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .attention-list li:last-child { border-bottom: none; }
+    .attention-list li:hover { background: #f8fafc; margin: 0 -12px; padding: 12px; border-radius: 8px; }
+    .attention-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .attention-icon.red { background: #fee2e2; color: var(--danger); }
+    .attention-icon.orange { background: #fef3c7; color: var(--warning); }
+    .attention-icon.yellow { background: #fef9c3; color: #a16207; }
+    .attention-icon.blue { background: #dbeafe; color: var(--primary); }
+    .attention-info { flex: 1; }
+    .attention-info .title { font-size: 13px; }
+    .attention-info .subtitle { font-size: 11px; color: var(--text-muted); }
+    .attention-count { font-size: 20px; font-weight: 700; color: var(--danger); }
+    .attention-arrow { color: #cbd5e1; font-size: 12px; }
+
+    /* PROGRESS CHART */
+    .progress-chart-wrapper { display: flex; gap: 16px; align-items: flex-start; }
+    .progress-chart-container { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
+    .progress-legend { flex: 1; }
+    .progress-legend-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; }
+    .progress-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .progress-legend-info { flex: 1; }
+    .progress-legend-info .label { font-size: 12px; }
+    .progress-legend-info .label-en { font-size: 10px; color: var(--text-muted); }
+    .progress-legend-value { font-size: 14px; font-weight: 600; }
+
+    /* REPORTS */
+    .reports-list { list-style: none; }
+    .reports-list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .reports-list li:last-child { border-bottom: none; }
+    .reports-list li:hover { background: #f8fafc; margin: 0 -12px; padding: 10px 12px; border-radius: 8px; }
+    .report-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .report-icon.blue { background: #dbeafe; color: var(--primary); }
+    .report-icon.green { background: #dcfce7; color: var(--success); }
+    .report-icon.orange { background: #fef3c7; color: var(--warning); }
+    .report-info { flex: 1; }
+    .report-info .title { font-size: 12px; font-weight: 500; }
+    .report-info .subtitle { font-size: 10px; color: var(--text-muted); }
+    .report-meta { text-align: left; }
+    .report-meta .date { font-size: 11px; color: var(--text-muted); }
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 500; }
+    .status-completed { background: #dcfce7; color: #166534; }
+    .status-progress { background: #fef3c7; color: #92400e; }
+
+    /* QUICK ACTIONS */
+    .quick-actions-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .quick-action-item { text-align: center; padding: 16px 8px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .quick-action-item:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+    .quick-action-item:hover .quick-label { color: rgba(255,255,255,0.8); }
+    .quick-action-item:hover .quick-icon { background: rgba(255,255,255,0.2) !important; color: white !important; }
+    .quick-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 8px; }
+    .quick-label { font-size: 11px; color: var(--text-muted); line-height: 1.3; }
+    .quick-label small { font-size: 10px; display: block; }
+
+    /* KNOWLEDGE */
+    .knowledge-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; padding: 20px; color: white; }
+    .knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .knowledge-header h3 { font-size: 14px; margin: 0; }
+    .knowledge-header .subtitle { font-size: 11px; color: #94a3b8; }
+    .knowledge-header a { font-size: 12px; color: #60a5fa; text-decoration: none; }
+    .knowledge-header a:hover { text-decoration: underline; }
+    .knowledge-body { display: flex; gap: 20px; align-items: center; }
+    .gauge-container { position: relative; width: 140px; height: 100px; flex-shrink: 0; }
+    .gauge-value { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; }
+    .gauge-value .percent { font-size: 28px; font-weight: 700; }
+    .gauge-value .label { font-size: 10px; color: #94a3b8; }
+    .gauge-stars { text-align: center; margin-top: 4px; color: #fbbf24; font-size: 12px; }
+    .knowledge-stats { flex: 1; }
+    .knowledge-stat { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .knowledge-stat:last-child { border-bottom: none; }
+    .knowledge-stat .label { color: #94a3b8; }
+    .knowledge-stat .value { font-weight: 600; }
+
+    /* FOOTER */
+    .footer { padding: 12px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); background: var(--card-bg); }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--card-bg); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-header h3 { margin: 0; }
+    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .section-grid-3 { grid-template-columns: 1fr; } .section-grid-2 { grid-template-columns: 1fr; } .quick-actions-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1024px) { .sidebar { transform: translateX(100%); } .sidebar.open { transform: translateX(0); } .main { margin-right: 0; } .menu-toggle { display: block; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } .top-btn .label { display: none; } }
+    @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .quick-actions-grid { grid-template-columns: repeat(2, 1fr); } .search-box input { width: 180px; } .welcome-section { flex-direction: column; gap: 12px; } }
+
+    /* TOOLTIP */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--text-main); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    [data-tooltip]:hover::after { opacity: 1; }
+  </style>
+<base target="_blank">
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i class="fas fa-shield-alt"></i></div>
+      <div class="sidebar-brand">
+        <h2>IA PLATFORM</h2>
+        <span>Internal Audit Excellence</span>
+      </div>
+    </div>
+
+    <ul class="menu" id="mainMenu">
+      <li class="active" data-page="dashboard" onclick="navigateTo('dashboard', this)">
+        <i class="fas fa-home"></i>
+        <span>لوحة التحكم<br><small>Dashboard</small></span>
+      </li>
+      <li data-page="annual-plan" onclick="navigateTo('annual-plan', this)">
+        <i class="fas fa-calendar-alt"></i>
+        <span>الخطة السنوية للتدقيق<br><small>Annual Audit Plan</small></span>
+      </li>
+      <li data-page="engagements" onclick="navigateTo('engagements', this)">
+        <i class="fas fa-clipboard-list"></i>
+        <span>مهام التدقيق<br><small>Audit Engagements</small></span>
+      </li>
+      <li data-page="risk-register" onclick="navigateTo('risk-register', this)">
+        <i class="fas fa-shield-alt"></i>
+        <span>سجل المخاطر<br><small>Risk Register</small></span>
+      </li>
+      <li data-page="findings" onclick="navigateTo('findings', this)">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>الملاحظات والتوصيات<br><small>Findings & Recommendations</small></span>
+      </li>
+      <li data-page="corrective" onclick="navigateTo('corrective', this)">
+        <i class="fas fa-check-circle"></i>
+        <span>متابعة الإجراءات التصحيحية<br><small>Corrective Action Tracking</small></span>
+      </li>
+      <li data-page="reports" onclick="navigateTo('reports', this)">
+        <i class="fas fa-file-alt"></i>
+        <span>التقارير<br><small>Reports</small></span>
+      </li>
+      <li data-page="evidence" onclick="navigateTo('evidence', this)">
+        <i class="fas fa-folder-open"></i>
+        <span>مركز الأدلة<br><small>Evidence Center</small></span>
+      </li>
+      <li data-page="academy" onclick="navigateTo('academy', this)">
+        <i class="fas fa-graduation-cap"></i>
+        <span>أكاديمية التدقيق<br><small>Audit Academy</small></span>
+      </li>
+      <li data-page="settings" onclick="navigateTo('settings', this)">
+        <i class="fas fa-cog"></i>
+        <span>الإعدادات<br><small>Settings</small></span>
+      </li>
+    </ul>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-bottom-item" onclick="toggleSidebarCollapse()">
+        <i class="fas fa-angle-double-right"></i>
+        <span>طي القائمة<br>Collapse</span>
+      </div>
+      <div class="sidebar-bottom-item" onclick="toggleLightMode()">
+        <i class="fas fa-sun"></i>
+        <span>الوضع الفاتح<br>Light Mode</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="avatar">أ</div>
+      <div>
+        <div style="color:#f8fafc; font-weight:500;">أحمد الشمري</div>
+        <div>Chief Audit Executive</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="search-box">
+          <input type="text" placeholder="بحث سريع / Search..." id="globalSearch" onkeyup="handleSearch(event)">
+          <i class="fas fa-search"></i>
+          <span class="search-shortcut">Ctrl + K</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="top-btn" onclick="openAIAssistant()">
+          <i class="fas fa-robot"></i>
+          <div class="label">
+            <span>AI Assistant</span>
+            <small>المساعد الذكي</small>
+          </div>
+        </button>
+        <button class="top-btn" onclick="openAuditAcademy()">
+          <i class="fas fa-graduation-cap"></i>
+          <div class="label">
+            <span>Audit Academy</span>
+            <small>أكاديمية التدقيق</small>
+          </div>
+        </button>
+        <div class="top-icon" data-tooltip="الإشعارات" onclick="showNotifications()">
+          <i class="fas fa-bell"></i><span class="badge-count">5</span>
+        </div>
+        <div class="lang-switch" onclick="toggleLanguage()">
+          <i class="fas fa-globe"></i>
+          <div>
+            <div>العربية</div>
+            <div style="font-size:10px; color:var(--text-muted);">English</div>
+          </div>
+        </div>
+        <div class="user-profile" onclick="showProfile()">
+          <div class="avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23475569' rx='18'/%3E%3Ctext x='18' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3Eأ%3C/text%3E%3C/svg%3E" alt="Profile"></div>
+          <div class="user-info">
+            <div class="name">أحمد الشمري</div>
+            <div class="role">مدير التدقيق الداخلي · Chief Audit Executive</div>
+          </div>
+          <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="mainContent">
+
+      <!-- Welcome Section -->
+      <div class="welcome-section">
+        <div class="welcome-text">
+          <h2>مرحباً أحمد 👋</h2>
+          <p>Welcome back, Ahmed</p>
+        </div>
+        <div class="date-display">
+          <i class="far fa-calendar-alt"></i>
+          <div class="date-text">
+            <div class="ar">الأحد، 1 يونيو 2026</div>
+            <div class="en">Sunday, 1 June 2026</div>
+          </div>
+          <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i>
+        </div>
+      </div>
+
+      <!-- KPI Section Title -->
+      <div class="kpi-section-title">
+        نظرة عامة على الأداء
+        <small>Performance Overview</small>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card" onclick="filterByStatus('plan-progress')" data-tooltip="عرض تفاصيل الخطة">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon blue"><i class="fas fa-clipboard-check"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--primary);">76%</div>
+              <div class="kpi-label">تنفيذ الخطة السنوية</div>
+              <div class="kpi-label-en">Audit Plan Progress</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:76%; background:var(--primary);"></div></div>
+            <div class="kpi-progress-text">100% من 100%</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatus('open')" data-tooltip="عرض المهام المفتوحة">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon green"><i class="fas fa-clipboard-list"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--success);">18</div>
+              <div class="kpi-label">المهام المفتوحة</div>
+              <div class="kpi-label-en">Open Engagements</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:75%; background:var(--success);"></div></div>
+            <div class="kpi-progress-text">إجمالي 24 من Total</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatus('overdue')" data-tooltip="عرض المهام المتأخرة">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon orange"><i class="fas fa-hourglass-half"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--warning);">6</div>
+              <div class="kpi-label">المهام المتأخرة</div>
+              <div class="kpi-label-en">Overdue Engagements</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:25%; background:var(--warning);"></div></div>
+            <div class="kpi-progress-text">إجمالي 24 من Total</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatus('high-risk')" data-tooltip="عرض المخاطر العالية">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--danger);">7</div>
+              <div class="kpi-label">المخاطر العالية</div>
+              <div class="kpi-label-en">High Risks</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:17%; background:var(--danger);"></div></div>
+            <div class="kpi-progress-text">إجمالي 42 من Total</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="openPage('findings')" data-tooltip="عرض نسبة التنفيذ">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon purple"><i class="fas fa-chart-line"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:#9333ea;">82%</div>
+              <div class="kpi-label">تنفيذ التوصيات</div>
+              <div class="kpi-label-en">Recommendations Implementation</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:82%; background:#9333ea;"></div></div>
+            <div class="kpi-progress-text">100% من 100%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: My Today + Needs Attention + Overall Progress -->
+      <div class="section-grid-3">
+        <!-- My Today -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>مهامي اليوم</h3>
+              <span class="subtitle">My Today</span>
+            </div>
+            <a href="#" onclick="viewAllTasks()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+          </div>
+          <ul class="tasks-list">
+            <li onclick="openTask('procurement-review')">
+              <div class="task-time">
+                <div class="time">09:00</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon blue"><i class="fas fa-clipboard-check"></i></div>
+              <div class="task-info">
+                <div class="title">مراجعة عمليات المشتريات</div>
+                <div class="subtitle">Review Procurement Process</div>
+              </div>
+              <span class="task-badge badge-review">مراجعة</span>
+              <span class="task-code">ENG-2026-015</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('inventory-approval')">
+              <div class="task-time">
+                <div class="time">11:00</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="task-info">
+                <div class="title">اعتماد تقرير المخزون</div>
+                <div class="subtitle">Approve Inventory Report</div>
+              </div>
+              <span class="task-badge badge-approval">اعتماد</span>
+              <span class="task-code">ENG-2026-008</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('upload-evidence')">
+              <div class="task-time">
+                <div class="time">14:00</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon orange"><i class="fas fa-cloud-upload-alt"></i></div>
+              <div class="task-info">
+                <div class="title">رفع الأدلة المطلوبة</div>
+                <div class="subtitle">Upload Required Evidence</div>
+              </div>
+              <span class="task-badge badge-evidence">أدلة</span>
+              <span class="task-code">ENG-2026-023</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('finance-meeting')">
+              <div class="task-time">
+                <div class="time">15:30</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon purple"><i class="fas fa-users"></i></div>
+              <div class="task-info">
+                <div class="title">اجتماع مع إدارة المالية</div>
+                <div class="subtitle">Meeting with Finance Dept.</div>
+              </div>
+              <span class="task-badge badge-meeting">اجتماع</span>
+              <span class="task-code">ENG-2026-011</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('corrective-review')">
+              <div class="task-time">
+                <div class="time">16:30</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon teal"><i class="fas fa-tasks"></i></div>
+              <div class="task-info">
+                <div class="title">مراجعة إجراء تصحيحي</div>
+                <div class="subtitle">Review Corrective Action</div>
+              </div>
+              <span class="task-badge badge-followup">متابعة</span>
+              <span class="task-code">CAP-2026-004</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Needs Attention -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>يحتاج اهتماماً</h3>
+              <span class="subtitle">Needs Attention</span>
+            </div>
+            <a href="#" onclick="viewAllAttention()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+          </div>
+          <ul class="attention-list">
+            <li onclick="openAttention('high-risks')">
+              <div class="attention-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="attention-info">
+                <div class="title">مخاطر عالية</div>
+                <div class="subtitle">High Risks</div>
+              </div>
+              <div class="attention-count">7</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+            <li onclick="openAttention('overdue')">
+              <div class="attention-icon orange"><i class="fas fa-hourglass-half"></i></div>
+              <div class="attention-info">
+                <div class="title">مهام متأخرة</div>
+                <div class="subtitle">Overdue Engagements</div>
+              </div>
+              <div class="attention-count" style="color:var(--warning);">6</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+            <li onclick="openAttention('missing-evidence')">
+              <div class="attention-icon yellow"><i class="fas fa-folder-open"></i></div>
+              <div class="attention-info">
+                <div class="title">أدلة مفقودة</div>
+                <div class="subtitle">Missing Evidence</div>
+              </div>
+              <div class="attention-count" style="color:var(--warning);">9</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+            <li onclick="openAttention('pending-approvals')">
+              <div class="attention-icon blue"><i class="fas fa-clock"></i></div>
+              <div class="attention-info">
+                <div class="title">اعتمادات معلقة</div>
+                <div class="subtitle">Pending Approvals</div>
+              </div>
+              <div class="attention-count" style="color:var(--primary);">4</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Overall Progress + Recent Reports -->
+        <div>
+          <!-- Overall Progress -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div>
+                <h3>التقدم العام</h3>
+                <span class="subtitle">Overall Progress</span>
+              </div>
+              <a href="#" onclick="viewReport()">عرض التقرير <i class="fas fa-arrow-left"></i></a>
+            </div>
+            <div class="progress-chart-wrapper">
+              <div class="progress-chart-container">
+                <canvas id="progressChart"></canvas>
+              </div>
+              <div class="progress-legend">
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#2563eb;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">مكتمل</div>
+                    <div class="label-en">Completed</div>
+                  </div>
+                  <div class="progress-legend-value">76%</div>
+                </div>
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#22c55e;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">قيد التنفيذ</div>
+                    <div class="label-en">In Progress</div>
+                  </div>
+                  <div class="progress-legend-value">14%</div>
+                </div>
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#f59e0b;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">متأخر</div>
+                    <div class="label-en">Overdue</div>
+                  </div>
+                  <div class="progress-legend-value">6%</div>
+                </div>
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#9ca3af;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">ملغى</div>
+                    <div class="label-en">Cancelled</div>
+                  </div>
+                  <div class="progress-legend-value">4%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Reports -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>أحدث التقارير</h3>
+                <span class="subtitle">Recent Reports</span>
+              </div>
+              <a href="#" onclick="viewAllReports()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+            </div>
+            <ul class="reports-list">
+              <li onclick="openReport('procurement')">
+                <div class="report-icon blue"><i class="fas fa-file-alt"></i></div>
+                <div class="report-info">
+                  <div class="title">تقرير تدقيق المشتريات</div>
+                  <div class="subtitle">Procurement Audit Report</div>
+                </div>
+                <div class="report-meta">
+                  <div class="date">31/05/2026</div>
+                  <span class="status-badge status-completed">مكتمل</span>
+                </div>
+              </li>
+              <li onclick="openReport('inventory')">
+                <div class="report-icon green"><i class="fas fa-file-alt"></i></div>
+                <div class="report-info">
+                  <div class="title">تقرير تدقيق المخزون</div>
+                  <div class="subtitle">Inventory Audit Report</div>
+                </div>
+                <div class="report-meta">
+                  <div class="date">30/05/2026</div>
+                  <span class="status-badge status-completed">مكتمل</span>
+                </div>
+              </li>
+              <li onclick="openReport('hr')">
+                <div class="report-icon orange"><i class="fas fa-file-alt"></i></div>
+                <div class="report-info">
+                  <div class="title">تقرير تدقيق الموارد البشرية</div>
+                  <div class="subtitle">HR Audit Report</div>
+                </div>
+                <div class="report-meta">
+                  <div class="date">28/05/2026</div>
+                  <span class="status-badge status-progress">قيد التنفيذ</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Quick Actions + Knowledge Score -->
+      <div class="section-grid-2">
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>إجراءات سريعة</h3>
+              <span class="subtitle">Quick Actions</span>
+            </div>
+          </div>
+          <div class="quick-actions-grid">
+            <div class="quick-action-item" onclick="quickAction('new-engagement')">
+              <div class="quick-icon" style="background:#dbeafe; color:var(--primary);"><i class="fas fa-plus-circle"></i></div>
+              <div class="quick-label">مهمة تدقيق جديدة<small>New Engagement</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('new-report')">
+              <div class="quick-icon" style="background:#dcfce7; color:var(--success);"><i class="fas fa-file-medical"></i></div>
+              <div class="quick-label">تقرير جديد<small>New Report</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('add-finding')">
+              <div class="quick-icon" style="background:#fef3c7; color:var(--warning);"><i class="fas fa-plus-square"></i></div>
+              <div class="quick-label">إضافة ملاحظة<small>Add Finding</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('upload-evidence')">
+              <div class="quick-icon" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-cloud-upload-alt"></i></div>
+              <div class="quick-label">رفع دليل<small>Upload Evidence</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('followup-action')">
+              <div class="quick-icon" style="background:#ccfbf1; color:#0d9488;"><i class="fas fa-check-double"></i></div>
+              <div class="quick-label">متابعة إجراء تصحيحي<small>Follow up Action</small></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Knowledge Score -->
+        <div class="knowledge-card">
+          <div class="knowledge-header">
+            <div>
+              <h3>مؤشر المعرفة</h3>
+              <span class="subtitle">Knowledge Score</span>
+            </div>
+            <a href="#" onclick="goToAcademy()">عرض الأكاديمية <i class="fas fa-arrow-left"></i></a>
+          </div>
+          <div class="knowledge-body">
+            <div>
+              <div class="gauge-container">
+                <canvas id="knowledgeGauge" width="140" height="100"></canvas>
+                <div class="gauge-value">
+                  <div class="percent">84%</div>
+                  <div class="label">إجمالي التقدم</div>
+                </div>
+              </div>
+              <div class="gauge-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+            </div>
+            <div class="knowledge-stats">
+              <div class="knowledge-stat">
+                <span class="label">المستوى الحالي</span>
+                <span class="value">Advanced</span>
+              </div>
+              <div class="knowledge-stat">
+                <span class="label">الاختبارات المكتملة</span>
+                <span class="value">24 / 30</span>
+              </div>
+              <div class="knowledge-stat">
+                <span class="label">الشهادات المتحققة</span>
+                <span class="value">6</span>
+              </div>
+              <div class="knowledge-stat">
+                <span class="label">النقاط</span>
+                <span class="value">2,450</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div>© 2026 IA Platform. All rights reserved.</div>
+      <div>جميع البيانات محدثة حتى 1 يونيو 2026، 08:30 صباحاً · All data is updated till 1 June 2026, 08:30 AM</div>
+      <div>الإصدار 1.0.0 · Version 1.0.0</div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">عنوان</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="modalContent">محتوى</div>
+  </div>
+</div>
+
+<script>
+// ======================
+// NAVIGATION
+// ======================
+function navigateTo(page, element) {
+  document.querySelectorAll('.menu li').forEach(li => li.classList.remove('active'));
+  element.classList.add('active');
+  const titles = {
+    'dashboard': { title: 'لوحة التحكم', subtitle: 'نظرة عامة على أداء التدقيق الداخلي' },
+    'annual-plan': { title: 'الخطة السنوية للتدقيق', subtitle: 'Annual Audit Plan Management' },
+    'engagements': { title: 'مهام التدقيق', subtitle: 'Audit Engagements Management' },
+    'risk-register': { title: 'سجل المخاطر', subtitle: 'Risk Register & Assessment' },
+    'findings': { title: 'الملاحظات والتوصيات', subtitle: 'Findings & Recommendations' },
+    'corrective': { title: 'متابعة الإجراءات التصحيحية', subtitle: 'Corrective Action Tracking' },
+    'reports': { title: 'التقارير', subtitle: 'Audit Reports Center' },
+    'evidence': { title: 'مركز الأدلة', subtitle: 'Evidence Management' },
+    'academy': { title: 'أكاديمية التدقيق', subtitle: 'Audit Academy & Training' },
+    'settings': { title: 'الإعدادات', subtitle: 'System Settings' }
+  };
+  if (titles[page]) {
+    document.getElementById('pageTitle').textContent = titles[page].title;
+    document.getElementById('pageSubtitle').textContent = titles[page].subtitle;
+  }
+  console.log('Navigating to:', page);
+  if (window.innerWidth <= 1024) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function toggleSidebarCollapse() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+let lightMode = false;
+function toggleLightMode() {
+  lightMode = !lightMode;
+  console.log('Light mode toggle:', lightMode);
+}
+
+// ======================
+// CHARTS
+// ======================
+let progressChart;
+
+function initCharts() {
+  // Progress Doughnut Chart
+  const ctx = document.getElementById('progressChart').getContext('2d');
+  progressChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['مكتمل', 'قيد التنفيذ', 'متأخر', 'ملغى'],
+      datasets: [{
+        data: [76, 14, 6, 4],
+        backgroundColor: ['#2563eb', '#22c55e', '#f59e0b', '#9ca3af'],
+        borderWidth: 0,
+        cutout: '72%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.parsed + '%';
+            }
+          }
+        }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const labels = ['completed', 'in-progress', 'overdue', 'cancelled'];
+          filterByStatus(labels[elements[0].index]);
+        }
+      }
+    }
+  });
+
+  // Center text plugin
+  Chart.register({
+    id: 'centerText',
+    beforeDraw: function(chart) {
+      if (chart.canvas.id === 'progressChart') {
+        const ctx = chart.ctx;
+        const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+        const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+        ctx.save();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = 'bold 22px "Segoe UI"'; ctx.fillStyle = '#1e293b';
+        ctx.fillText('76%', centerX, centerY - 6);
+        ctx.font = '11px "Segoe UI"'; ctx.fillStyle = '#64748b';
+        ctx.fillText('إجمالي التقدم', centerX, centerY + 12);
+        ctx.fillText('Overall Progress', centerX, centerY + 24);
+        ctx.restore();
+      }
+    }
+  });
+
+  // Knowledge Gauge
+  drawKnowledgeGauge();
+}
+
+function drawKnowledgeGauge() {
+  const canvas = document.getElementById('knowledgeGauge');
+  const ctx = canvas.getContext('2d');
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height - 10;
+  const radius = 55;
+  const startAngle = Math.PI;
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, startAngle, 2 * Math.PI);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Progress arc (84%)
+  const progressAngle = startAngle + (84 / 100) * Math.PI;
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  gradient.addColorStop(0, '#22c55e');
+  gradient.addColorStop(1, '#3b82f6');
+
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, startAngle, progressAngle);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = gradient;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+}
+
+// ======================
+// ACTION HANDLERS
+// ======================
+function openPage(page) {
+  console.log('Opening page:', page);
+  showModal('تنبيه', 'سيتم فتح صفحة: ' + page + '<br><strong>← اربط هذه الدالة بالتوجيه الفعلي</strong>');
+}
+
+function filterByStatus(status) {
+  console.log('Filter by status:', status);
+  showModal('تصفية', 'تصفية حسب: ' + status + '<br><strong>← اربط هذه الدالة بـ API</strong>');
+}
+
+function openAIAssistant() {
+  showModal('AI Assistant', 'المساعد الذكي<br><strong>← اربط هذه الدالة بـ AI API</strong>');
+}
+
+function openAuditAcademy() {
+  navigateTo('academy', document.querySelector('[data-page="academy"]'));
+}
+
+function toggleLanguage() {
+  showModal('تبديل اللغة', 'سيتم تبديل اللغة بين العربية والإنجليزية<br><strong>← اربط هذه الدالة بنظام الترجمة</strong>');
+}
+
+function showNotifications() {
+  showModal('الإشعارات', 'عرض جميع الإشعارات<br><strong>← اربط هذه الدالة بلوحة الإشعارات</strong>');
+}
+
+function showHelp() {
+  showModal('المساعدة', 'مركز المساعدة<br><strong>← اربط هذه الدالة بمركز المساعدة</strong>');
+}
+
+function showProfile() {
+  showModal('الملف الشخصي', 'عرض الملف الشخصي<br><strong>← اربط هذه الدالة بصفحة الملف الشخصي</strong>');
+}
+
+function handleSearch(event) {
+  if (event.key === 'Enter') {
+    const query = event.target.value;
+    console.log('Search:', query);
+    showModal('بحث', 'البحث عن: ' + query + '<br><strong>← اربط هذه الدالة بمحرك البحث</strong>');
+  }
+}
+
+function viewAllTasks() {
+  navigateTo('engagements', document.querySelector('[data-page="engagements"]'));
+}
+
+function openTask(taskId) {
+  console.log('Open task:', taskId);
+  showModal('مهمة', 'فتح مهمة: ' + taskId + '<br><strong>← اربط هذه الدالة بعرض المهمة</strong>');
+}
+
+function viewAllAttention() {
+  showModal('يحتاج اهتماماً', 'عرض جميع العناصر التي تحتاج اهتماماً<br><strong>← اربط هذه الدالة بصفحة الاهتمام</strong>');
+}
+
+function openAttention(type) {
+  console.log('Open attention:', type);
+  showModal('اهتمام', 'فتح: ' + type + '<br><strong>← اربط هذه الدالة بعرض التفاصيل</strong>');
+}
+
+function viewReport() {
+  showModal('التقرير', 'عرض التقرير الكامل<br><strong>← اربط هذه الدالة بتقرير التقدم</strong>');
+}
+
+function viewAllReports() {
+  navigateTo('reports', document.querySelector('[data-page="reports"]'));
+}
+
+function openReport(reportId) {
+  console.log('Open report:', reportId);
+  showModal('تقرير', 'فتح تقرير: ' + reportId + '<br><strong>← اربط هذه الدالة بعرض التقرير</strong>');
+}
+
+function quickAction(action) {
+  console.log('Quick action:', action);
+  const actions = {
+    'new-engagement': 'إنشاء مهمة تدقيق جديدة',
+    'new-report': 'إنشاء تقرير جديد',
+    'add-finding': 'إضافة ملاحظة جديدة',
+    'upload-evidence': 'رفع دليل جديد',
+    'followup-action': 'متابعة إجراء تصحيحي'
+  };
+  showModal('إجراء سريع', actions[action] + '<br><strong>← اربط هذه الدالة بنموذج الإدخال</strong>');
+}
+
+function goToAcademy() {
+  navigateTo('academy', document.querySelector('[data-page="academy"]'));
+}
+
+// ======================
+// MODAL SYSTEM
+// ======================
+function showModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal(event) {
+  if (!event || event.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+}
+
+// ======================
+// INIT
+// ======================
+document.addEventListener('DOMContentLoaded', function() {
+  initCharts();
+});
+</script>
+
+</body>
+</html>
