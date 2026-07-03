@@ -246,8 +246,65 @@
     [data-tooltip]:hover::after { opacity: 1; }
   </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
+
+<!-- Guest Banner -->
+<div class="guest-banner" id="guestBanner">
+  ⚠️ أنت في وضع الزائر. بعض الميزات محدودة. <a href="index.html" style="color: #92400e; text-decoration: underline;">تسجيل الدخول للوصول الكامل</a>
+</div>
+
+<script>
+// ======================
+// AUTH CHECK - حماية الصفحة
+// ======================
+(function() {
+  const session = JSON.parse(localStorage.getItem("auditSession"));
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Update user info when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    const userName = session.name || session.username;
+    const avatar = userName.charAt(0).toUpperCase();
+
+    // Update sidebar
+    const sidebarName = document.querySelector('.sidebar-footer div div:first-child');
+    const sidebarAvatar = document.querySelector('.sidebar-footer .avatar');
+    if (sidebarName) sidebarName.textContent = userName;
+    if (sidebarAvatar) sidebarAvatar.textContent = avatar;
+
+    // Update top bar
+    const topName = document.querySelector('.user-profile .name');
+    const topAvatar = document.querySelector('.user-profile .avatar');
+    if (topName) topName.textContent = userName;
+    if (topAvatar) topAvatar.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23475569' rx='18'/%3E%3Ctext x='18' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E' + avatar + '%3C/text%3E%3C/svg%3E" alt="Profile">';
+
+    // Update welcome title
+    const welcomeTitle = document.querySelector('.welcome-text h2');
+    if (welcomeTitle) welcomeTitle.textContent = 'مرحباً ' + userName + ' 👋';
+
+    // Guest restrictions
+    if (session.role === "guest") {
+      document.getElementById('guestBanner').classList.add('active');
+      // Disable quick actions for guest
+      document.querySelectorAll('.quick-action-item').forEach(item => {
+        item.style.opacity = '0.5';
+        item.style.pointerEvents = 'none';
+      });
+    }
+  });
+})();
+
+function logout() {
+  localStorage.removeItem("auditSession");
+  window.location.href = "index.html";
+}
+</script>
+
 <div class="layout">
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
@@ -367,7 +424,12 @@
           </div>
           <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i>
         </div>
-      </div>
+      
+                <button class="top-btn" onclick="logout()" style="color: var(--danger);">
+          <i class="fas fa-sign-out-alt"></i>
+          <div class="label"><span>خروج</span><small>Logout</small></div>
+        </button>
+</div>
     </div>
 
     <!-- Content -->
@@ -1058,6 +1120,130 @@ function closeModal(event) {
 document.addEventListener('DOMContentLoaded', function() {
   initCharts();
 });
+
+
+// ======================
+// AUDIT REPORT FUNCTIONS
+// ======================
+function openReportModal() {
+  document.getElementById('reportModalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReportModal(event) {
+  if (!event || event.target === document.getElementById('reportModalOverlay')) {
+    document.getElementById('reportModalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+function saveAuditReport(event) {
+  event.preventDefault();
+
+  const session = JSON.parse(localStorage.getItem("auditSession"));
+  if (session && session.role === "guest") {
+    showModal('تنبيه', 'الزائر لا يمكنه حفظ التقارير. يرجى تسجيل الدخول.');
+    return;
+  }
+
+  const report = {
+    id: "AR-" + Date.now(),
+    auditNumber: document.getElementById("auditNumber").value,
+    title: document.getElementById("auditTitle").value,
+    department: document.getElementById("auditDepartment").value,
+    auditPeriod: document.getElementById("auditPeriod").value,
+    auditor: document.getElementById("auditor").value,
+    reviewer: document.getElementById("reviewer").value,
+    reportDate: document.getElementById("reportDate").value,
+    auditObjective: document.getElementById("auditObjective").value,
+    scope: document.getElementById("auditScope").value,
+    observation: document.getElementById("condition").value,
+    rootCause: document.getElementById("rootCause").value,
+    recommendation: document.getElementById("recommendation").value,
+    overallConclusion: document.getElementById("overallConclusion").value,
+    status: document.getElementById("status").value || "Draft",
+    createdAt: new Date().toISOString(),
+    createdBy: session?.username || "unknown"
+  };
+
+  let reports = JSON.parse(localStorage.getItem("auditReports")) || [];
+  reports.push(report);
+  localStorage.setItem("auditReports", JSON.stringify(reports));
+
+  alert("تم حفظ التقرير بنجاح!");
+  closeReportModal();
+  updateDashboard();
+}
+
+function updateDashboard() {
+  let reports = JSON.parse(localStorage.getItem("auditReports")) || [];
+
+  // Update KPIs
+  const openCount = reports.filter(r => r.status === "Open" || r.status === "In Progress").length;
+  const overdueCount = reports.filter(r => r.status === "Overdue").length;
+  const highRiskCount = reports.filter(r => r.riskRating === "Critical" || r.riskRating === "High").length;
+
+  const kpiOpen = document.getElementById("kpiOpenEngagements");
+  const kpiOverdue = document.getElementById("kpiOverdue");
+  const kpiHighRisk = document.getElementById("kpiHighRisks");
+  const attentionOverdue = document.getElementById("attentionOverdue");
+
+  if (kpiOpen) kpiOpen.textContent = openCount;
+  if (kpiOverdue) kpiOverdue.textContent = overdueCount;
+  if (kpiHighRisk) kpiHighRisk.textContent = highRiskCount;
+  if (attentionOverdue) attentionOverdue.textContent = overdueCount;
+
+  // Update recent reports list
+  const recentReportsList = document.getElementById("recentReportsList");
+  if (recentReportsList && reports.length > 0) {
+    let html = "";
+    reports.slice(-3).reverse().forEach(function(r) {
+      const statusClass = r.status === "Closed" ? "status-completed" : "status-progress";
+      const statusText = r.status === "Closed" ? "مكتمل" : (r.status === "Open" ? "مفتوح" : "قيد التنفيذ");
+      const iconColor = r.status === "Closed" ? "green" : "orange";
+      html += `
+      <li onclick="openReport('${r.id}')">
+        <div class="report-icon ${iconColor}"><i class="fas fa-file-alt"></i></div>
+        <div class="report-info"><div class="title">${r.title || "Untitled"}</div><div class="subtitle">${r.department || "N/A"}</div></div>
+        <div class="report-meta"><div class="date">${r.reportDate || "N/A"}</div><span class="status-badge ${statusClass}">${statusText}</span></div>
+      </li>
+      `;
+    });
+    recentReportsList.innerHTML = html;
+  }
+}
+
+// Override quickAction to handle new-report
+const originalQuickAction = quickAction;
+quickAction = function(action) {
+  if (action === 'new-report') {
+    const session = JSON.parse(localStorage.getItem("auditSession"));
+    if (session && session.role === "guest") {
+      showModal('تنبيه', 'الزائر لا يمكنه إنشاء تقارير. يرجى تسجيل الدخول.');
+      return;
+    }
+    openReportModal();
+    return;
+  }
+  originalQuickAction(action);
+};
+
+// Update date on load
+const originalInit = initCharts;
+initCharts = function() {
+  originalInit();
+  updateDashboard();
+
+  // Update dates
+  const now = new Date();
+  const dateAr = document.getElementById('dateAr');
+  const dateEn = document.getElementById('dateEn');
+  const footerDate = document.getElementById('footerDate');
+
+  if (dateAr) dateAr.textContent = now.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  if (dateEn) dateEn.textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  if (footerDate) footerDate.textContent = now.toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' });
+};
 </script>
 
 </body>
