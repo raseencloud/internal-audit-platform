@@ -1246,5 +1246,99 @@ initCharts = function() {
 };
 </script>
 
+
+
+<!-- Report Creation Modal -->
+<div class="modal-overlay" id="reportModalOverlay" onclick="closeReportModal(event)">
+  <div class="modal" style="max-width: 900px; width: 95%;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>إنشاء تقرير تدقيق جديد</h3>
+      <button class="modal-close" onclick="closeReportModal()">&times;</button>
+    </div>
+    <div id="modalContent">
+      <form onsubmit="saveAuditReport(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">رقم التدقيق</label>
+            <input type="text" id="auditNumber" class="form-input" placeholder="AUD-2026-001" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">عنوان التقرير</label>
+            <input type="text" id="auditTitle" class="form-input" placeholder="تقرير تدقيق المشتريات" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الإدارة / الجهة</label>
+            <input type="text" id="auditDepartment" class="form-input" placeholder="إدارة المشتريات">
+          </div>
+          <div class="form-group">
+            <label class="form-label">فترة التدقيق</label>
+            <input type="text" id="auditPeriod" class="form-input" placeholder="يناير - يونيو 2026">
+          </div>
+          <div class="form-group">
+            <label class="form-label">المدقق</label>
+            <input type="text" id="auditor" class="form-input" placeholder="اسم المدقق">
+          </div>
+          <div class="form-group">
+            <label class="form-label">المراجع</label>
+            <input type="text" id="reviewer" class="form-input" placeholder="اسم المراجع">
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ التقرير</label>
+            <input type="date" id="reportDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الحالة</label>
+            <select id="status" class="form-input" style="cursor: pointer;">
+              <option value="Draft">مسودة</option>
+              <option value="Open">مفتوح</option>
+              <option value="In Progress">قيد التنفيذ</option>
+              <option value="Closed">مغلق</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">هدف التدقيق</label>
+          <textarea id="auditObjective" class="form-input" rows="3" placeholder="وصف هدف التدقيق..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">نطاق التدقيق</label>
+          <textarea id="auditScope" class="form-input" rows="3" placeholder="وصف نطاق التدقيق..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">الملاحظة / Condition</label>
+          <textarea id="condition" class="form-input" rows="3" placeholder="وصف الملاحظة..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">السبب الجذري / Root Cause</label>
+          <textarea id="rootCause" class="form-input" rows="3" placeholder="تحليل السبب الجذري..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">التوصية / Recommendation</label>
+          <textarea id="recommendation" class="form-input" rows="3" placeholder="التوصية المقترحة..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">الخلاصة العامة / Overall Conclusion</label>
+          <textarea id="overallConclusion" class="form-input" rows="3" placeholder="الخلاصة العامة للتقرير..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">
+            <i class="fas fa-save"></i> حفظ التقرير
+          </button>
+          <button type="button" class="btn btn-ghost" onclick="closeReportModal()" style="flex: 1;">
+            <i class="fas fa-times"></i> إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
