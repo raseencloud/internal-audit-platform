@@ -1,1 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Intelligence Platform - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0b3d91 0%, #0f766e 100%);
+        }
+        
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-box h1 {
+            color: #0b3d91;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .login-box input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .login-box input:focus {
+            outline: none;
+            border-color: #0b3d91;
+        }
+        
+        .login-box button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            font-size: 16px;
+        }
+        
+        .login-box .guest-btn {
+            background: transparent;
+            color: #0b3d91;
+            border: 2px solid #0b3d91;
+            margin-top: 10px;
+        }
+        
+        .login-box .guest-btn:hover {
+            background: #0b3d91;
+            color: white;
+        }
+        
+        .error-msg {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
 
+<div class="login-container">
+    <div class="login-box">
+        <h1>🔍 Audit Intelligence Platform</h1>
+        <p>Sign in to access your audit dashboard</p>
+        
+        <input type="text" id="username" placeholder="Username | اسم المستخدم">
+        <input type="password" id="password" placeholder="Password | كلمة المرور">
+        
+        <div class="error-msg" id="errorMsg">Invalid username or password</div>
+        
+        <button onclick="login()">Sign In | تسجيل الدخول</button>
+        <button class="guest-btn" onclick="guestLogin()">Continue as Guest | دخول زائر</button>
+    </div>
+</div>
+
+<script>
+const USERS = [
+    { username: "admin", password: "admin123", role: "admin", name: "Administrator" },
+    { username: "auditor", password: "audit123", role: "auditor", name: "Senior Auditor" },
+    { username: "reviewer", password: "review123", role: "reviewer", name: "Report Reviewer" }
+];
+
+function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errorMsg = document.getElementById("errorMsg");
+    
+    const user = USERS.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        const session = {
+            username: user.username,
+            name: user.name,
+            role: user.role,
+            loginTime: new Date().toISOString()
+        };
+        localStorage.setItem("auditSession", JSON.stringify(session));
+        window.location.href = "index.html";
+    } else {
+        errorMsg.style.display = "block";
+        setTimeout(() => { errorMsg.style.display = "none"; }, 3000);
+    }
+}
+
+function guestLogin() {
+    const session = {
+        username: "guest",
+        name: "Guest User",
+        role: "guest",
+        loginTime: new Date().toISOString()
+    };
+    localStorage.setItem("auditSession", JSON.stringify(session));
+    window.location.href = "index.html";
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") login();
+});
+</script>
+
+</body>
+</html>
