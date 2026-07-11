@@ -1,1 +1,738 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA Platform - Internal Audit Excellence</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --dark-light: #1e293b;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    }
 
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    .animate-fade { animation: fadeIn 0.6s ease-out forwards; }
+    .animate-slide-right { animation: slideInRight 0.6s ease-out forwards; }
+    .animate-slide-left { animation: slideInLeft 0.6s ease-out forwards; }
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 0 40px;
+      transition: all 0.3s;
+    }
+    .navbar.scrolled { box-shadow: var(--shadow); }
+    .navbar-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      height: 70px;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px;
+    }
+    .logo-text h1 { font-size: 18px; color: var(--dark); margin: 0; }
+    .logo-text span { font-size: 11px; color: var(--text-muted); }
+
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; position: relative; }
+    .nav-links a:hover { color: var(--primary); }
+    .nav-links a::after { content: ''; position: absolute; bottom: -4px; right: 0; width: 0; height: 2px; background: var(--primary); transition: width 0.3s; }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .btn {
+      padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      border: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #3b82f6); color: white;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary-light); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+    .btn-large { padding: 14px 32px; font-size: 16px; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 24px; color: var(--text); cursor: pointer; }
+
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 100px 40px 60px;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -50%; right: -20%; width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); border-radius: 50%;
+    }
+    .hero-inner { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero-content h2 { font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 20px; color: var(--dark); }
+    .hero-content h2 span { background: linear-gradient(135deg, var(--primary), #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-content p { font-size: 18px; color: var(--text-muted); margin-bottom: 32px; max-width: 500px; }
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 32px; margin-top: 40px; }
+    .hero-stat { text-align: center; }
+    .hero-stat .number { font-size: 32px; font-weight: 700; color: var(--primary); }
+    .hero-stat .label { font-size: 13px; color: var(--text-muted); }
+
+    .hero-visual { position: relative; display: flex; justify-content: center; align-items: center; }
+    .hero-card { background: var(--white); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-lg); width: 320px; animation: float 6s ease-in-out infinite; }
+    .hero-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .hero-card-title { font-size: 14px; font-weight: 600; }
+    .hero-card-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; background: #dcfce7; color: #166534; }
+    .hero-chart-bar { height: 8px; border-radius: 4px; background: var(--border); margin-bottom: 8px; overflow: hidden; }
+    .hero-chart-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), #3b82f6); }
+    .hero-floating-icon { position: absolute; width: 60px; height: 60px; background: var(--white); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); font-size: 24px; animation: float 4s ease-in-out infinite; }
+    .hero-floating-icon.icon-1 { top: 10%; right: 10%; color: var(--success); animation-delay: 0s; }
+    .hero-floating-icon.icon-2 { bottom: 20%; left: 0%; color: var(--warning); animation-delay: 1s; }
+    .hero-floating-icon.icon-3 { top: 50%; right: -5%; color: var(--danger); animation-delay: 2s; }
+
+    .features { padding: 100px 40px; background: var(--white); }
+    .section-header { text-align: center; max-width: 600px; margin: 0 auto 60px; }
+    .section-header h2 { font-size: 36px; font-weight: 700; margin-bottom: 16px; color: var(--dark); }
+    .section-header p { font-size: 16px; color: var(--text-muted); }
+    .features-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .feature-card { background: var(--bg); border-radius: 16px; padding: 32px; border: 1px solid var(--border); transition: all 0.3s; }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-light); }
+    .feature-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+    .feature-icon.blue { background: #dbeafe; color: var(--primary); }
+    .feature-icon.green { background: #dcfce7; color: var(--success); }
+    .feature-icon.orange { background: #fef3c7; color: var(--warning); }
+    .feature-icon.purple { background: #f3e8ff; color: #9333ea; }
+    .feature-icon.red { background: #fee2e2; color: var(--danger); }
+    .feature-icon.teal { background: #ccfbf1; color: #0d9488; }
+    .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-muted); }
+
+    .how-it-works { padding: 100px 40px; background: var(--bg); }
+    .steps-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .step-card { text-align: center; padding: 24px; position: relative; }
+    .step-card:not(:last-child)::after { content: ''; position: absolute; top: 40px; left: -12px; width: 24px; height: 2px; background: var(--border); }
+    .step-number { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 0 auto 16px; }
+    .step-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .step-card p { font-size: 13px; color: var(--text-muted); }
+
+    .plans { padding: 100px 40px; background: var(--white); }
+    .plans-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .plan-card { background: var(--bg); border-radius: 20px; padding: 40px 32px; border: 2px solid var(--border); transition: all 0.3s; position: relative; }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .plan-card.featured { border-color: var(--primary); transform: scale(1.05); }
+    .plan-card.featured:hover { transform: scale(1.05) translateY(-4px); }
+    .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .plan-card h3 { font-size: 20px; margin-bottom: 8px; }
+    .plan-price { font-size: 48px; font-weight: 800; color: var(--dark); margin: 16px 0; }
+    .plan-price span { font-size: 16px; color: var(--text-muted); font-weight: 400; }
+    .plan-features { list-style: none; margin: 24px 0; }
+    .plan-features li { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 14px; color: var(--text-muted); }
+    .plan-features li i { color: var(--success); font-size: 12px; }
+
+    .testimonials { padding: 100px 40px; background: var(--bg); }
+    .testimonials-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .testimonial-card { background: var(--white); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .testimonial-stars { color: #fbbf24; margin-bottom: 16px; }
+    .testimonial-text { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.8; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
+    .testimonial-info h4 { font-size: 14px; margin: 0; }
+    .testimonial-info span { font-size: 12px; color: var(--text-muted); }
+
+    .cta { padding: 100px 40px; background: linear-gradient(135deg, var(--dark), var(--dark-light)); color: white; text-align: center; }
+    .cta h2 { font-size: 36px; margin-bottom: 16px; }
+    .cta p { font-size: 16px; color: #94a3b8; margin-bottom: 32px; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-white { background: white; color: var(--dark); box-shadow: 0 4px 14px rgba(255,255,255,0.2); }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.3); }
+    .btn-transparent { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.3); }
+    .btn-transparent:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+    .landing-footer { background: var(--dark); color: #94a3b8; padding: 60px 40px 20px; }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+    .footer-brand h3 { color: white; font-size: 20px; margin-bottom: 12px; }
+    .footer-brand p { font-size: 14px; line-height: 1.8; }
+    .footer-links h4 { color: white; font-size: 14px; margin-bottom: 16px; }
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 10px; }
+    .footer-links a { color: #94a3b8; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .footer-links a:hover { color: white; }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+    .footer-social { display: flex; gap: 16px; }
+    .footer-social a { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.2s; }
+    .footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+
+    .auth-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .auth-overlay.active { display: flex; }
+    .auth-container { background: var(--white); border-radius: 24px; width: 100%; max-width: 1000px; max-height: 90vh; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; box-shadow: var(--shadow-lg); animation: fadeIn 0.4s ease-out; }
+    .auth-visual { background: linear-gradient(135deg, var(--primary), #1e40af); padding: 60px 40px; color: white; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
+    .auth-visual::before { content: ''; position: absolute; top: -50%; right: -50%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); border-radius: 50%; }
+    .auth-visual h2 { font-size: 28px; margin-bottom: 16px; position: relative; }
+    .auth-visual p { font-size: 14px; opacity: 0.9; line-height: 1.8; position: relative; }
+    .auth-visual-features { margin-top: 40px; position: relative; }
+    .auth-visual-feature { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .auth-visual-feature i { font-size: 20px; }
+    .auth-visual-feature span { font-size: 14px; }
+    .auth-form-wrapper { padding: 48px 40px; overflow-y: auto; position: relative; }
+    .auth-close { position: absolute; top: 20px; left: 20px; width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 18px; transition: all 0.2s; }
+    .auth-close:hover { background: var(--border); color: var(--text); }
+    .auth-header { margin-bottom: 32px; }
+    .auth-header h2 { font-size: 24px; margin-bottom: 8px; }
+    .auth-header p { font-size: 14px; color: var(--text-muted); }
+    .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--bg); padding: 4px; border-radius: 10px; }
+    .auth-tab { flex: 1; padding: 10px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-muted); transition: all 0.2s; }
+    .auth-tab.active { background: var(--white); color: var(--primary); box-shadow: var(--shadow); }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .form-input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px; font-size: 14px; transition: all 0.2s; background: var(--bg); }
+    .form-input:focus { outline: none; border-color: var(--primary); background: var(--white); }
+    .form-input::placeholder { color: #94a3b8; }
+    .form-input-icon { position: relative; }
+    .form-input-icon i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; }
+    .form-input-icon input { padding-right: 44px; }
+    .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px; }
+    .form-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .form-checkbox input { width: 18px; height: 18px; accent-color: var(--primary); }
+    .form-link { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .form-link:hover { text-decoration: underline; }
+    .auth-divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: var(--text-muted); font-size: 13px; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .social-login { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-social { padding: 12px; border-radius: 10px; border: 2px solid var(--border); background: var(--white); cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; color: var(--text); }
+    .btn-social:hover { background: var(--bg); border-color: var(--primary); }
+    .btn-social i { font-size: 18px; }
+    .btn-social.google i { color: #ea4335; }
+    .btn-social.microsoft i { color: #00a4ef; }
+    .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-muted); }
+    .auth-footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .guest-access { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center; }
+    .guest-access p { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+    .btn-guest { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; box-shadow: 0 4px 14px rgba(245,158,11,0.3); }
+    .btn-guest:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+    .verify-message { display: none; text-align: center; padding: 40px 20px; }
+    .verify-message.active { display: block; }
+    .verify-message i { font-size: 64px; color: var(--success); margin-bottom: 20px; }
+    .verify-message h3 { font-size: 22px; margin-bottom: 12px; }
+    .verify-message p { color: var(--text-muted); margin-bottom: 24px; }
+
+    @media (max-width: 1024px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; }
+      .hero-content p { margin: 0 auto 32px; }
+      .hero-buttons { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-visual { display: none; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .plans-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .plan-card.featured { transform: none; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+      .auth-container { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+    }
+    @media (max-width: 768px) {
+      .hero-content h2 { font-size: 32px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .step-card:not(:last-child)::after { display: none; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 16px; }
+      .navbar { padding: 0 20px; }
+      .hero, .features, .how-it-works, .plans, .testimonials, .cta { padding: 60px 20px; }
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+      <div class="logo-text">
+        <h1>IA PLATFORM</h1>
+        <span>Internal Audit Excellence</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">المميزات</a></li>
+      <li><a href="#how-it-works">كيف يعمل</a></li>
+      <li><a href="#plans">الخطط</a></li>
+      <li><a href="#testimonials">آراء العملاء</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" onclick="openAuth('login')">تسجيل الدخول</button>
+      <button class="btn btn-primary" onclick="openAuth('register')">ابدأ مجاناً</button>
+    </div>
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <h2 class="animate-fade">منصة متكاملة لـ <span>التدقيق الداخلي</span></h2>
+      <p class="animate-fade delay-1">إدارة مهام التدقيق، المخاطر، التوصيات، والإجراءات التصحيحية في منصة واحدة ذكية وآمنة</p>
+      <div class="hero-buttons animate-fade delay-2">
+        <button class="btn btn-primary btn-large" onclick="openAuth('register')">
+          <i class="fas fa-rocket"></i> ابدأ تجربتك المجانية
+        </button>
+        <button class="btn btn-outline btn-large" onclick="enterAsGuest()">
+          <i class="fas fa-user"></i> دخول كزائر
+        </button>
+      </div>
+      <div class="hero-stats animate-fade delay-3">
+        <div class="hero-stat"><div class="number">500+</div><div class="label">شركة تستخدم المنصة</div></div>
+        <div class="hero-stat"><div class="number">10K+</div><div class="label">مهمة تدقيق مكتملة</div></div>
+        <div class="hero-stat"><div class="number">98%</div><div class="label">رضا العملاء</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="hero-card-title">تقدم الخطة السنوية</span>
+          <span class="hero-card-badge">+12%</span>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>مكتمل</span><span style="color: var(--primary); font-weight: 600;">76%</span></div>
+          <div class="hero-chart-bar"><div class="hero-chart-fill" style="width: 76%;"></div></div>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>قيد التنفيذ</span><span style="color: var(--success); font-weight: 600;">14%</span></div>
+          <div class="hero-chart-bar"><div class="hero-chart-fill" style="width: 14%; background: var(--success);"></div></div>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>متأخر</span><span style="color: var(--warning); font-weight: 600;">6%</span></div>
+          <div class="hero-chart-bar"><div class="hero-chart-fill" style="width: 6%; background: var(--warning);"></div></div>
+        </div>
+      </div>
+      <div class="hero-floating-icon icon-1"><i class="fas fa-check-circle"></i></div>
+      <div class="hero-floating-icon icon-2"><i class="fas fa-chart-line"></i></div>
+      <div class="hero-floating-icon icon-3"><i class="fas fa-shield-alt"></i></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="features">
+  <div class="section-header animate-fade">
+    <h2>كل ما تحتاجه في منصة واحدة</h2>
+    <p>حلول متكاملة تغطي جميع جوانب عملية التدقيق الداخلي بكفاءة واحترافية</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card animate-fade delay-1">
+      <div class="feature-icon blue"><i class="fas fa-clipboard-list"></i></div>
+      <h3>إدارة المهام</h3>
+      <p>تخطيط وتنفيذ ومتابعة جميع مهام التدقيق بسهولة مع جدولة ذكية وتنبيهات تلقائية</p>
+    </div>
+    <div class="feature-card animate-fade delay-2">
+      <div class="feature-icon green"><i class="fas fa-shield-alt"></i></div>
+      <h3>سجل المخاطر</h3>
+      <p>تقييم المخاطر وتحليلها وتصنيفها مع لوحات تحكم تفاعلية وخرائط حرارية</p>
+    </div>
+    <div class="feature-card animate-fade delay-3">
+      <div class="feature-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+      <h3>الملاحظات والتوصيات</h3>
+      <p>توثيق الملاحظات وإصدار التوصيات ومتابعة تنفيذها مع تقارير تفصيلية</p>
+    </div>
+    <div class="feature-card animate-fade delay-1">
+      <div class="feature-icon purple"><i class="fas fa-check-double"></i></div>
+      <h3>الإجراءات التصحيحية</h3>
+      <p>متابعة الإجراءات التصحيحية من البداية حتى الإغلاق مع التنبيهات المتأخرة</p>
+    </div>
+    <div class="feature-card animate-fade delay-2">
+      <div class="feature-icon red"><i class="fas fa-file-alt"></i></div>
+      <h3>التقارير الذكية</h3>
+      <p>إنشاء تقارير احترافية تلقائية مع قوالب جاهزة وتحليلات بصرية متقدمة</p>
+    </div>
+    <div class="feature-card animate-fade delay-3">
+      <div class="feature-icon teal"><i class="fas fa-graduation-cap"></i></div>
+      <h3>أكاديمية التدقيق</h3>
+      <p>تدريب وتطوير فريق التدقيق مع شهادات معتمدة واختبارات تقييمية</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works" id="how-it-works">
+  <div class="section-header animate-fade">
+    <h2>كيف تعمل المنصة؟</h2>
+    <p>أربع خطوات بسيطة لتحويل عملية التدقيق لديك</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card animate-fade delay-1"><div class="step-number">1</div><h3>أنشئ خطتك</h3><p>حدد أهداف التدقيق السنوية ووزع المهام على الفريق</p></div>
+    <div class="step-card animate-fade delay-2"><div class="step-number">2</div><h3>نفذ المهام</h3><p>تابع سير العمل مع جدولة ذكية وتنبيهات تلقائية</p></div>
+    <div class="step-card animate-fade delay-3"><div class="step-number">3</div><h3>سجل النتائج</h3><p>وثق الملاحظات والتوصيات والمخاطر المكتشفة</p></div>
+    <div class="step-card animate-fade delay-4"><div class="step-number">4</div><h3>تابع التحسين</h3><p>راقب الإجراءات التصحيحية وقيس الأداء باستمرار</p></div>
+  </div>
+</section>
+
+<!-- Plans Section -->
+<section class="plans" id="plans">
+  <div class="section-header animate-fade">
+    <h2>اختر الخطة المناسبة لك</h2>
+    <p>خطط مرنة تناسب جميع الأحجام مع إمكانية التجربة المجانية</p>
+  </div>
+  <div class="plans-grid">
+    <div class="plan-card animate-fade delay-1">
+      <h3>البداية</h3>
+      <div class="plan-price">مجاناً <span>/ للأبد</span></div>
+      <ul class="plan-features">
+        <li><i class="fas fa-check"></i> 3 مهام تدقيق نشطة</li>
+        <li><i class="fas fa-check"></i> سجل مخاطر أساسي</li>
+        <li><i class="fas fa-check"></i> تقارير PDF</li>
+        <li><i class="fas fa-check"></i> دعم عبر البريد</li>
+        <li><i class="fas fa-check"></i> مستخدم واحد</li>
+      </ul>
+      <button class="btn btn-outline btn-full" onclick="openAuth('register')">سجل مجاناً</button>
+    </div>
+    <div class="plan-card featured animate-fade delay-2">
+      <div class="plan-badge">الأكثر شيوعاً</div>
+      <h3>المحترف</h3>
+      <div class="plan-price">$49 <span>/ شهرياً</span></div>
+      <ul class="plan-features">
+        <li><i class="fas fa-check"></i> مهام تدقيق غير محدودة</li>
+        <li><i class="fas fa-check"></i> سجل مخاطر متقدم</li>
+        <li><i class="fas fa-check"></i> تقارير تفاعلية</li>
+        <li><i class="fas fa-check"></i> دعم فوري 24/7</li>
+        <li><i class="fas fa-check"></i> حتى 10 مستخدمين</li>
+        <li><i class="fas fa-check"></i> أكاديمية التدقيق</li>
+      </ul>
+      <button class="btn btn-primary btn-full" onclick="openAuth('register')">ابدأ الآن</button>
+    </div>
+    <div class="plan-card animate-fade delay-3">
+      <h3>المؤسسات</h3>
+      <div class="plan-price">$199 <span>/ شهرياً</span></div>
+      <ul class="plan-features">
+        <li><i class="fas fa-check"></i> كل مميزات المحترف</li>
+        <li><i class="fas fa-check"></i> مستخدمين غير محدود</li>
+        <li><i class="fas fa-check"></i> API للتكامل</li>
+        <li><i class="fas fa-check"></i> مدير حساب مخصص</li>
+        <li><i class="fas fa-check"></i> تخصيص كامل</li>
+        <li><i class="fas fa-check"></i> استضافة خاصة</li>
+      </ul>
+      <button class="btn btn-outline btn-full" onclick="openAuth('register')">تواصل معنا</button>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials" id="testimonials">
+  <div class="section-header animate-fade">
+    <h2>ماذا يقول عملاؤنا؟</h2>
+    <p>ثقة مئات الشركات في منصتنا لتحسين عمليات التدقيق الداخلي</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card animate-fade delay-1">
+      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p class="testimonial-text">"حولت المنصة عملية التدقيق لدينا بالكامل. أصبحنا نستطيع متابعة جميع المهام والمخاطر في لوحة واحدة واضحة."</p>
+      <div class="testimonial-author"><div class="testimonial-avatar">ع</div><div class="testimonial-info"><h4>عبدالله الراشد</h4><span>مدير التدقيق - بنك الرياض</span></div></div>
+    </div>
+    <div class="testimonial-card animate-fade delay-2">
+      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p class="testimonial-text">"أفضل استثمار قمنا به. التقارير الذكية وفرت لنا 60% من الوقت المستهلك في إعداد التقارير اليدوية."</p>
+      <div class="testimonial-author"><div class="testimonial-avatar">ف</div><div class="testimonial-info"><h4>فهد المطيري</h4><span>رئيس التدقيق - stc</span></div></div>
+    </div>
+    <div class="testimonial-card animate-fade delay-3">
+      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+      <p class="testimonial-text">"أكاديمية التدقيق ساعدت فريقي على التطور المهني بشكل ملحوظ. الشهادات المعتمدة أضافت قيمة كبيرة."</p>
+      <div class="testimonial-author"><div class="testimonial-avatar">ن</div><div class="testimonial-info"><h4>نورة القحطاني</h4><span>مديرة ضمان الجودة - أرامكو</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <h2 class="animate-fade">ابدأ رحلة التحول الرقمي اليوم</h2>
+  <p class="animate-fade delay-1">انضم إلى 500+ شركة تثق بمنصتنا لإدارة التدقيق الداخلي</p>
+  <div class="cta-buttons animate-fade delay-2">
+    <button class="btn btn-white btn-large" onclick="openAuth('register')"><i class="fas fa-rocket"></i> ابدأ مجاناً لمدة 14 يوم</button>
+    <button class="btn btn-transparent btn-large" onclick="enterAsGuest()"><i class="fas fa-user"></i> جرب كزائر</button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3><i class="fas fa-shield-alt" style="color: var(--primary); margin-left: 8px;"></i>IA PLATFORM</h3>
+      <p>منصة متكاملة لإدارة التدقيق الداخلي بكفاءة واحترافية. نساعد المؤسسات على تحسين الحوكمة وإدارة المخاطر وضمان الامتثال.</p>
+    </div>
+    <div class="footer-links">
+      <h4>المنتج</h4>
+      <ul><li><a href="#features">المميزات</a></li><li><a href="#plans">الأسعار</a></li><li><a href="#">التحديثات</a></li><li><a href="#">API</a></li></ul>
+    </div>
+    <div class="footer-links">
+      <h4>الشركة</h4>
+      <ul><li><a href="#">من نحن</a></li><li><a href="#">الوظائف</a></li><li><a href="#">المدونة</a></li><li><a href="#">اتصل بنا</a></li></ul>
+    </div>
+    <div class="footer-links">
+      <h4>الدعم</h4>
+      <ul><li><a href="#">مركز المساعدة</a></li><li><a href="#">الشروط والأحكام</a></li><li><a href="#">سياسة الخصوصية</a></li><li><a href="#">الأمان</a></li></ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 IA Platform. جميع الحقوق محفوظة.</div>
+    <div class="footer-social">
+      <a href="#"><i class="fab fa-twitter"></i></a>
+      <a href="#"><i class="fab fa-linkedin-in"></i></a>
+      <a href="#"><i class="fab fa-youtube"></i></a>
+      <a href="#"><i class="fab fa-github"></i></a>
+    </div>
+  </div>
+</footer>
+
+<!-- Auth Modal -->
+<div class="auth-overlay" id="authOverlay" onclick="closeAuth(event)">
+  <div class="auth-container" onclick="event.stopPropagation()">
+    <div class="auth-visual">
+      <h2>انضم إلى مستقبل التدقيق الداخلي</h2>
+      <p>منصة ذكية تجمع كل ما تحتاجه لإدارة التدقيق بكفاءة واحترافية</p>
+      <div class="auth-visual-features">
+        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>إدارة مهام متكاملة</span></div>
+        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>تقارير ذكية تلقائية</span></div>
+        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>تكامل مع الأنظمة</span></div>
+        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>دعم فني 24/7</span></div>
+      </div>
+    </div>
+    <div class="auth-form-wrapper">
+      <button class="auth-close" onclick="closeAuth()">&times;</button>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <div class="auth-header"><h2>تسجيل الدخول</h2><p>أدخل بياناتك للوصول إلى حسابك</p></div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+          <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
+        </div>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="form-input-icon"><i class="fas fa-envelope"></i><input type="email" class="form-input" placeholder="your@email.com" required></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="form-input-icon"><i class="fas fa-lock"></i><input type="password" class="form-input" placeholder="••••••••" required></div>
+          </div>
+          <div class="form-options">
+            <label class="form-checkbox"><input type="checkbox"> تذكرني</label>
+            <a href="#" class="form-link" onclick="showForgotPassword()">نسيت كلمة المرور؟</a>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
+        </form>
+        <div class="auth-divider">أو</div>
+        <div class="social-login">
+          <button class="btn-social google" onclick="socialLogin('google')"><i class="fab fa-google"></i> Google</button>
+          <button class="btn-social microsoft" onclick="socialLogin('microsoft')"><i class="fab fa-microsoft"></i> Microsoft</button>
+        </div>
+        <div class="guest-access">
+          <p>تريد تجربة المنصة أولاً؟</p>
+          <button class="btn btn-guest btn-full" onclick="enterAsGuest()"><i class="fas fa-user"></i> دخول كزائر</button>
+        </div>
+        <div class="auth-footer">ليس لديك حساب؟ <a href="#" onclick="switchAuthTab('register')">سجل الآن</a></div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerForm" style="display: none;">
+        <div class="auth-header"><h2>إنشاء حساب جديد</h2><p>ابدأ رحلتك مع منصة التدقيق الذكية</p></div>
+        <div class="auth-tabs">
+          <button class="auth-tab" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+          <button class="auth-tab active" onclick="switchAuthTab('register')">حساب جديد</button>
+        </div>
+        <form onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل</label>
+            <div class="form-input-icon"><i class="fas fa-user"></i><input type="text" class="form-input" placeholder="محمد العتيبي" required></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="form-input-icon"><i class="fas fa-envelope"></i><input type="email" class="form-input" placeholder="your@email.com" required></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الشركة / المؤسسة</label>
+            <div class="form-input-icon"><i class="fas fa-building"></i><input type="text" class="form-input" placeholder="اسم الشركة"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="form-input-icon"><i class="fas fa-lock"></i><input type="password" class="form-input" placeholder="••••••••" required></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تأكيد كلمة المرور</label>
+            <div class="form-input-icon"><i class="fas fa-lock"></i><input type="password" class="form-input" placeholder="••••••••" required></div>
+          </div>
+          <div class="form-options">
+            <label class="form-checkbox"><input type="checkbox" required> أوافق على <a href="#" class="form-link">الشروط والأحكام</a></label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-user-plus"></i> إنشاء الحساب</button>
+        </form>
+        <div class="auth-divider">أو</div>
+        <div class="social-login">
+          <button class="btn-social google" onclick="socialLogin('google')"><i class="fab fa-google"></i> Google</button>
+          <button class="btn-social microsoft" onclick="socialLogin('microsoft')"><i class="fab fa-microsoft"></i> Microsoft</button>
+        </div>
+        <div class="guest-access">
+          <p>تريد تجربة المنصة أولاً؟</p>
+          <button class="btn btn-guest btn-full" onclick="enterAsGuest()"><i class="fas fa-user"></i> دخول كزائر</button>
+        </div>
+        <div class="auth-footer">لديك حساب بالفعل؟ <a href="#" onclick="switchAuthTab('login')">تسجيل الدخول</a></div>
+      </div>
+
+      <!-- Forgot Password -->
+      <div id="forgotForm" style="display: none;">
+        <div class="auth-header"><h2>استعادة كلمة المرور</h2><p>أدخل بريدك الإلكتروني لإرسال رابط الاستعادة</p></div>
+        <form onsubmit="handleForgotPassword(event)">
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="form-input-icon"><i class="fas fa-envelope"></i><input type="email" class="form-input" placeholder="your@email.com" required></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-paper-plane"></i> إرسال رابط الاستعادة</button>
+        </form>
+        <div class="auth-footer"><a href="#" class="form-link" onclick="switchAuthTab('login')">← العودة لتسجيل الدخول</a></div>
+      </div>
+
+      <!-- Verification Message -->
+      <div class="verify-message" id="verifyMessage">
+        <i class="fas fa-envelope-open-text"></i>
+        <h3>تحقق من بريدك الإلكتروني</h3>
+        <p>تم إرسال رابط التفعيل إلى بريدك الإلكتروني. يرجى النقر على الرابط لتفعيل حسابك.</p>
+        <button class="btn btn-primary" onclick="switchAuthTab('login')"><i class="fas fa-sign-in-alt"></i> الذهاب إلى تسجيل الدخول</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Navbar scroll effect
+window.addEventListener('scroll', function() {
+  const navbar = document.getElementById('navbar');
+  if (window.scrollY > 50) { navbar.classList.add('scrolled'); }
+  else { navbar.classList.remove('scrolled'); }
+});
+
+// Auth Modal Functions
+function openAuth(type) {
+  document.getElementById('authOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  if (type === 'guest') { enterAsGuest(); }
+  else if (type === 'register') { switchAuthTab('register'); }
+  else { switchAuthTab('login'); }
+}
+
+function closeAuth(event) {
+  if (!event || event.target === document.getElementById('authOverlay')) {
+    document.getElementById('authOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('verifyMessage').classList.remove('active');
+}
+
+function showForgotPassword() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'block';
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+  // حفظ جلسة المستخدم
+  const session = {
+    username: "admin",
+    name: "أحمد الشمري",
+    role: "admin",
+    loginTime: new Date().toISOString()
+  };
+  localStorage.setItem("auditSession", JSON.stringify(session));
+  window.location.href = "dashboard.html";
+}
+
+function handleRegister(event) {
+  event.preventDefault();
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('verifyMessage').classList.add('active');
+}
+
+function handleForgotPassword(event) {
+  event.preventDefault();
+  alert('تم إرسال رابط الاستعادة');
+}
+
+function socialLogin(provider) {
+  alert('تسجيل الدخول عبر ' + provider);
+}
+
+function enterAsGuest() {
+  const session = {
+    username: "guest",
+    name: "Guest User",
+    role: "guest",
+    loginTime: new Date().toISOString()
+  };
+  localStorage.setItem("auditSession", JSON.stringify(session));
+  window.location.href = "dashboard.html";
+}
+
+function toggleMobileMenu() {
+  alert('قائمة الجوال');
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+</script>
+
+</body>
+</html>
