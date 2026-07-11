@@ -3,736 +3,1343 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IA Platform - Internal Audit Excellence</title>
+  <title>IA Platform – Internal Audit Excellence</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --primary-light: #dbeafe;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --dark: #0f172a;
-      --dark-light: #1e293b;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --bg: #f8fafc;
-      --white: #ffffff;
-      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --primary: #2563eb; --primary-light: #3b82f6; --success: #22c55e;
+      --warning: #f59e0b; --danger: #ef4444; --info: #06b6d4;
+      --sidebar-bg: #0f172a; --sidebar-hover: #1e293b;
+      --card-bg: #ffffff; --body-bg: #f8fafc;
+      --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
+      --sidebar-width: 260px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
+    body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--body-bg); color: var(--text-main); overflow-x: hidden; }
+    .layout { display: flex; min-height: 100vh; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); color: #cbd5e1; display: flex; flex-direction: column; padding: 0; position: fixed; right: 0; top: 0; height: 100vh; z-index: 1000; transition: width 0.3s ease, transform 0.3s ease; }
+    .sidebar.collapsed { width: 70px; }
+    .sidebar.collapsed .sidebar-brand, .sidebar.collapsed .menu li span, .sidebar.collapsed .sidebar-footer div { display: none; }
+    .sidebar.collapsed .menu li { justify-content: center; padding: 12px; margin: 2px 8px; }
+    .sidebar.collapsed .menu li i { width: auto; font-size: 18px; }
+    .sidebar.collapsed .sidebar-header { justify-content: center; padding: 20px 0; }
+    .sidebar.collapsed .sidebar-footer { justify-content: center; padding: 16px 0; }
+    .sidebar-header { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; }
+    .sidebar-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+    .sidebar-brand h2 { font-size: 15px; color: #f8fafc; margin: 0; }
+    .sidebar-brand span { font-size: 10px; color: #94a3b8; }
+    .menu { list-style: none; padding: 8px 0; flex: 1; overflow-y: auto; }
+    .menu li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin: 2px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; position: relative; }
+    .menu li i { width: 20px; text-align: center; font-size: 15px; }
+    .menu li:hover { background: var(--sidebar-hover); color: #f8fafc; }
+    .menu li.active { background: var(--primary); color: #fff; }
+    .menu li.active::before { content: ''; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--primary-light); border-radius: 2px; }
+    .menu li small { font-size: 10px; color: #94a3b8; display: block; margin-top: 1px; }
+    .menu li.active small { color: rgba(255,255,255,0.7); }
+    .sidebar-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 10px; }
+    .sidebar-footer .avatar { width: 30px; height: 30px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+    .sidebar-bottom { border-top: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
+    .sidebar-bottom-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; font-size: 12px; color: #94a3b8; transition: all 0.2s; }
+    .sidebar-bottom-item:hover { color: #f8fafc; background: var(--sidebar-hover); }
+    .sidebar-bottom-item i { width: 20px; text-align: center; }
+    .sidebar.collapsed .sidebar-bottom-item { justify-content: center; padding: 8px; }
+    .sidebar.collapsed .sidebar-bottom-item span { display: none; }
 
-    .animate-fade { animation: fadeIn 0.6s ease-out forwards; }
-    .animate-slide-right { animation: slideInRight 0.6s ease-out forwards; }
-    .animate-slide-left { animation: slideInLeft 0.6s ease-out forwards; }
-    .delay-1 { animation-delay: 0.1s; opacity: 0; }
-    .delay-2 { animation-delay: 0.2s; opacity: 0; }
-    .delay-3 { animation-delay: 0.3s; opacity: 0; }
-    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+    /* MAIN */
+    .main { flex: 1; margin-right: var(--sidebar-width); padding: 0; min-height: 100vh; transition: margin-right 0.3s ease; }
+    .sidebar.collapsed ~ .main { margin-right: 70px; }
 
-    .navbar {
-      position: fixed; top: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      padding: 0 40px;
-      transition: all 0.3s;
-    }
-    .navbar.scrolled { box-shadow: var(--shadow); }
-    .navbar-inner {
-      max-width: 1400px; margin: 0 auto;
-      display: flex; justify-content: space-between; align-items: center;
-      height: 70px;
-    }
-    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .logo-icon {
-      width: 42px; height: 42px;
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 20px;
-    }
-    .logo-text h1 { font-size: 18px; color: var(--dark); margin: 0; }
-    .logo-text span { font-size: 11px; color: var(--text-muted); }
+    /* TOP BAR */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .top-bar-left { display: flex; align-items: center; gap: 16px; }
+    .menu-toggle { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-main); }
+    .search-box { position: relative; }
+    .search-box input { padding: 8px 36px 8px 12px; border: 1px solid var(--border); border-radius: 8px; width: 320px; font-size: 13px; background: #f1f5f9; }
+    .search-box input::placeholder { color: #94a3b8; }
+    .search-box i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; }
+    .search-shortcut { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #94a3b8; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; }
+    .top-bar-right { display: flex; align-items: center; gap: 12px; }
+    .top-btn { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; font-size: 12px; color: var(--text-main); transition: all 0.2s; }
+    .top-btn:hover { background: var(--body-bg); }
+    .top-btn i { font-size: 14px; }
+    .top-btn .label { display: flex; flex-direction: column; line-height: 1.2; }
+    .top-btn .label small { font-size: 10px; color: var(--text-muted); }
+    .top-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--body-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background 0.2s; border: 1px solid var(--border); }
+    .top-icon:hover { background: var(--border); }
+    .badge-count { position: absolute; top: -4px; left: -4px; background: var(--danger); color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .lang-switch { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 12px; color: var(--text-muted); }
+    .lang-switch:hover { background: var(--body-bg); }
+    .lang-switch i { font-size: 16px; }
+    .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
+    .user-profile:hover { background: var(--body-bg); }
+    .user-profile .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #475569, #64748b); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; overflow: hidden; }
+    .user-profile .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-info { text-align: right; }
+    .user-info .name { font-size: 13px; font-weight: 600; }
+    .user-info .role { font-size: 11px; color: var(--text-muted); }
 
-    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
-    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; position: relative; }
-    .nav-links a:hover { color: var(--primary); }
-    .nav-links a::after { content: ''; position: absolute; bottom: -4px; right: 0; width: 0; height: 2px; background: var(--primary); transition: width 0.3s; }
-    .nav-links a:hover::after { width: 100%; }
+    /* CONTENT */
+    .content { padding: 20px 24px; }
+    .welcome-section { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .welcome-text h2 { font-size: 20px; margin: 0 0 4px; }
+    .welcome-text p { font-size: 13px; color: var(--text-muted); margin: 0; }
+    .date-display { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; background: var(--card-bg); border: 1px solid var(--border); font-size: 13px; }
+    .date-display i { color: var(--primary); }
+    .date-display .date-text { text-align: right; }
+    .date-display .date-text .ar { font-weight: 600; }
+    .date-display .date-text .en { font-size: 11px; color: var(--text-muted); }
 
-    .nav-actions { display: flex; align-items: center; gap: 12px; }
-    .btn {
-      padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-      border: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #3b82f6); color: white;
-      box-shadow: 0 4px 14px rgba(37,99,235,0.3);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
-    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-    .btn-outline:hover { background: var(--primary-light); }
-    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-    .btn-ghost:hover { background: var(--bg); color: var(--text); }
-    .btn-large { padding: 14px 32px; font-size: 16px; }
-    .btn-full { width: 100%; justify-content: center; }
+    /* KPI */
+    .kpi-section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .kpi-section-title small { font-size: 12px; color: var(--text-muted); font-weight: 400; display: block; margin-top: 2px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi-card { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--border); }
+    .kpi-card-inner { display: flex; align-items: flex-start; gap: 12px; }
+    .kpi-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .kpi-icon.blue { background: #dbeafe; color: var(--primary); }
+    .kpi-icon.green { background: #dcfce7; color: var(--success); }
+    .kpi-icon.orange { background: #fef3c7; color: var(--warning); }
+    .kpi-icon.red { background: #fee2e2; color: var(--danger); }
+    .kpi-icon.purple { background: #f3e8ff; color: #9333ea; }
+    .kpi-content { flex: 1; }
+    .kpi-value { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .kpi-label { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+    .kpi-label-en { font-size: 10px; color: #94a3b8; }
+    .kpi-progress { margin-top: 10px; }
+    .kpi-progress-bar { height: 4px; border-radius: 2px; background: #e2e8f0; overflow: hidden; }
+    .kpi-progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .kpi-progress-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-    .mobile-menu-btn { display: none; background: none; border: none; font-size: 24px; color: var(--text); cursor: pointer; }
+    /* GRIDS */
+    .section-grid-3 { display: grid; grid-template-columns: 1.4fr 1fr 1.1fr; gap: 16px; margin-bottom: 16px; }
+    .section-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .card-header h3 { font-size: 14px; margin: 0; }
+    .card-header .subtitle { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .card-header a { font-size: 12px; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .card-header a:hover { text-decoration: underline; }
 
-    .hero {
-      min-height: 100vh; display: flex; align-items: center;
-      padding: 100px 40px 60px;
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: ''; position: absolute; top: -50%; right: -20%; width: 800px; height: 800px;
-      background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); border-radius: 50%;
-    }
-    .hero-inner { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-    .hero-content h2 { font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 20px; color: var(--dark); }
-    .hero-content h2 span { background: linear-gradient(135deg, var(--primary), #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .hero-content p { font-size: 18px; color: var(--text-muted); margin-bottom: 32px; max-width: 500px; }
-    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
-    .hero-stats { display: flex; gap: 32px; margin-top: 40px; }
-    .hero-stat { text-align: center; }
-    .hero-stat .number { font-size: 32px; font-weight: 700; color: var(--primary); }
-    .hero-stat .label { font-size: 13px; color: var(--text-muted); }
+    /* TASKS */
+    .tasks-list { list-style: none; }
+    .tasks-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .tasks-list li:last-child { border-bottom: none; }
+    .tasks-list li:hover { background: #f8fafc; margin: 0 -12px; padding: 10px 12px; border-radius: 8px; }
+    .task-time { text-align: center; min-width: 40px; }
+    .task-time .time { font-size: 13px; font-weight: 600; }
+    .task-time .day { font-size: 10px; color: var(--text-muted); }
+    .task-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .task-icon.blue { background: #dbeafe; color: var(--primary); }
+    .task-icon.green { background: #dcfce7; color: var(--success); }
+    .task-icon.orange { background: #fef3c7; color: var(--warning); }
+    .task-icon.purple { background: #f3e8ff; color: #9333ea; }
+    .task-icon.teal { background: #ccfbf1; color: #0d9488; }
+    .task-info { flex: 1; }
+    .task-info .title { font-size: 13px; font-weight: 500; }
+    .task-info .subtitle { font-size: 11px; color: var(--text-muted); }
+    .task-badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 500; }
+    .badge-review { background: #dbeafe; color: var(--primary); }
+    .badge-approval { background: #dcfce7; color: var(--success); }
+    .badge-evidence { background: #fef3c7; color: var(--warning); }
+    .badge-meeting { background: #f3e8ff; color: #9333ea; }
+    .badge-followup { background: #ccfbf1; color: #0d9488; }
+    .task-code { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+    .task-arrow { color: #cbd5e1; font-size: 12px; }
 
-    .hero-visual { position: relative; display: flex; justify-content: center; align-items: center; }
-    .hero-card { background: var(--white); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-lg); width: 320px; animation: float 6s ease-in-out infinite; }
-    .hero-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .hero-card-title { font-size: 14px; font-weight: 600; }
-    .hero-card-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; background: #dcfce7; color: #166534; }
-    .hero-chart-bar { height: 8px; border-radius: 4px; background: var(--border); margin-bottom: 8px; overflow: hidden; }
-    .hero-chart-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), #3b82f6); }
-    .hero-floating-icon { position: absolute; width: 60px; height: 60px; background: var(--white); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); font-size: 24px; animation: float 4s ease-in-out infinite; }
-    .hero-floating-icon.icon-1 { top: 10%; right: 10%; color: var(--success); animation-delay: 0s; }
-    .hero-floating-icon.icon-2 { bottom: 20%; left: 0%; color: var(--warning); animation-delay: 1s; }
-    .hero-floating-icon.icon-3 { top: 50%; right: -5%; color: var(--danger); animation-delay: 2s; }
+    /* ATTENTION */
+    .attention-list { list-style: none; }
+    .attention-list li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .attention-list li:last-child { border-bottom: none; }
+    .attention-list li:hover { background: #f8fafc; margin: 0 -12px; padding: 12px; border-radius: 8px; }
+    .attention-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .attention-icon.red { background: #fee2e2; color: var(--danger); }
+    .attention-icon.orange { background: #fef3c7; color: var(--warning); }
+    .attention-icon.yellow { background: #fef9c3; color: #a16207; }
+    .attention-icon.blue { background: #dbeafe; color: var(--primary); }
+    .attention-info { flex: 1; }
+    .attention-info .title { font-size: 13px; }
+    .attention-info .subtitle { font-size: 11px; color: var(--text-muted); }
+    .attention-count { font-size: 20px; font-weight: 700; color: var(--danger); }
+    .attention-arrow { color: #cbd5e1; font-size: 12px; }
 
-    .features { padding: 100px 40px; background: var(--white); }
-    .section-header { text-align: center; max-width: 600px; margin: 0 auto 60px; }
-    .section-header h2 { font-size: 36px; font-weight: 700; margin-bottom: 16px; color: var(--dark); }
-    .section-header p { font-size: 16px; color: var(--text-muted); }
-    .features-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .feature-card { background: var(--bg); border-radius: 16px; padding: 32px; border: 1px solid var(--border); transition: all 0.3s; }
-    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-light); }
-    .feature-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
-    .feature-icon.blue { background: #dbeafe; color: var(--primary); }
-    .feature-icon.green { background: #dcfce7; color: var(--success); }
-    .feature-icon.orange { background: #fef3c7; color: var(--warning); }
-    .feature-icon.purple { background: #f3e8ff; color: #9333ea; }
-    .feature-icon.red { background: #fee2e2; color: var(--danger); }
-    .feature-icon.teal { background: #ccfbf1; color: #0d9488; }
-    .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
-    .feature-card p { font-size: 14px; color: var(--text-muted); }
+    /* PROGRESS CHART */
+    .progress-chart-wrapper { display: flex; gap: 16px; align-items: flex-start; }
+    .progress-chart-container { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
+    .progress-legend { flex: 1; }
+    .progress-legend-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; }
+    .progress-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .progress-legend-info { flex: 1; }
+    .progress-legend-info .label { font-size: 12px; }
+    .progress-legend-info .label-en { font-size: 10px; color: var(--text-muted); }
+    .progress-legend-value { font-size: 14px; font-weight: 600; }
 
-    .how-it-works { padding: 100px 40px; background: var(--bg); }
-    .steps-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-    .step-card { text-align: center; padding: 24px; position: relative; }
-    .step-card:not(:last-child)::after { content: ''; position: absolute; top: 40px; left: -12px; width: 24px; height: 2px; background: var(--border); }
-    .step-number { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 0 auto 16px; }
-    .step-card h3 { font-size: 16px; margin-bottom: 8px; }
-    .step-card p { font-size: 13px; color: var(--text-muted); }
+    /* REPORTS */
+    .reports-list { list-style: none; }
+    .reports-list li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+    .reports-list li:last-child { border-bottom: none; }
+    .reports-list li:hover { background: #f8fafc; margin: 0 -12px; padding: 10px 12px; border-radius: 8px; }
+    .report-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .report-icon.blue { background: #dbeafe; color: var(--primary); }
+    .report-icon.green { background: #dcfce7; color: var(--success); }
+    .report-icon.orange { background: #fef3c7; color: var(--warning); }
+    .report-info { flex: 1; }
+    .report-info .title { font-size: 12px; font-weight: 500; }
+    .report-info .subtitle { font-size: 10px; color: var(--text-muted); }
+    .report-meta { text-align: left; }
+    .report-meta .date { font-size: 11px; color: var(--text-muted); }
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 500; }
+    .status-completed { background: #dcfce7; color: #166534; }
+    .status-progress { background: #fef3c7; color: #92400e; }
 
-    .plans { padding: 100px 40px; background: var(--white); }
-    .plans-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .plan-card { background: var(--bg); border-radius: 20px; padding: 40px 32px; border: 2px solid var(--border); transition: all 0.3s; position: relative; }
-    .plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .plan-card.featured { border-color: var(--primary); transform: scale(1.05); }
-    .plan-card.featured:hover { transform: scale(1.05) translateY(-4px); }
-    .plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .plan-card h3 { font-size: 20px; margin-bottom: 8px; }
-    .plan-price { font-size: 48px; font-weight: 800; color: var(--dark); margin: 16px 0; }
-    .plan-price span { font-size: 16px; color: var(--text-muted); font-weight: 400; }
-    .plan-features { list-style: none; margin: 24px 0; }
-    .plan-features li { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 14px; color: var(--text-muted); }
-    .plan-features li i { color: var(--success); font-size: 12px; }
+    /* QUICK ACTIONS */
+    .quick-actions-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .quick-action-item { text-align: center; padding: 16px 8px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .quick-action-item:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+    .quick-action-item:hover .quick-label { color: rgba(255,255,255,0.8); }
+    .quick-action-item:hover .quick-icon { background: rgba(255,255,255,0.2) !important; color: white !important; }
+    .quick-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 8px; }
+    .quick-label { font-size: 11px; color: var(--text-muted); line-height: 1.3; }
+    .quick-label small { font-size: 10px; display: block; }
 
-    .testimonials { padding: 100px 40px; background: var(--bg); }
-    .testimonials-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .testimonial-card { background: var(--white); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-    .testimonial-stars { color: #fbbf24; margin-bottom: 16px; }
-    .testimonial-text { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.8; }
-    .testimonial-author { display: flex; align-items: center; gap: 12px; }
-    .testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
-    .testimonial-info h4 { font-size: 14px; margin: 0; }
-    .testimonial-info span { font-size: 12px; color: var(--text-muted); }
+    /* KNOWLEDGE */
+    .knowledge-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; padding: 20px; color: white; }
+    .knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .knowledge-header h3 { font-size: 14px; margin: 0; }
+    .knowledge-header .subtitle { font-size: 11px; color: #94a3b8; }
+    .knowledge-header a { font-size: 12px; color: #60a5fa; text-decoration: none; }
+    .knowledge-header a:hover { text-decoration: underline; }
+    .knowledge-body { display: flex; gap: 20px; align-items: center; }
+    .gauge-container { position: relative; width: 140px; height: 100px; flex-shrink: 0; }
+    .gauge-value { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; }
+    .gauge-value .percent { font-size: 28px; font-weight: 700; }
+    .gauge-value .label { font-size: 10px; color: #94a3b8; }
+    .gauge-stars { text-align: center; margin-top: 4px; color: #fbbf24; font-size: 12px; }
+    .knowledge-stats { flex: 1; }
+    .knowledge-stat { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .knowledge-stat:last-child { border-bottom: none; }
+    .knowledge-stat .label { color: #94a3b8; }
+    .knowledge-stat .value { font-weight: 600; }
 
-    .cta { padding: 100px 40px; background: linear-gradient(135deg, var(--dark), var(--dark-light)); color: white; text-align: center; }
-    .cta h2 { font-size: 36px; margin-bottom: 16px; }
-    .cta p { font-size: 16px; color: #94a3b8; margin-bottom: 32px; }
-    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .btn-white { background: white; color: var(--dark); box-shadow: 0 4px 14px rgba(255,255,255,0.2); }
-    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.3); }
-    .btn-transparent { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.3); }
-    .btn-transparent:hover { background: rgba(255,255,255,0.1); border-color: white; }
+    /* FOOTER */
+    .footer { padding: 12px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); background: var(--card-bg); }
 
-    .landing-footer { background: var(--dark); color: #94a3b8; padding: 60px 40px 20px; }
-    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-    .footer-brand h3 { color: white; font-size: 20px; margin-bottom: 12px; }
-    .footer-brand p { font-size: 14px; line-height: 1.8; }
-    .footer-links h4 { color: white; font-size: 14px; margin-bottom: 16px; }
-    .footer-links ul { list-style: none; }
-    .footer-links li { margin-bottom: 10px; }
-    .footer-links a { color: #94a3b8; text-decoration: none; font-size: 14px; transition: color 0.2s; }
-    .footer-links a:hover { color: white; }
-    .footer-bottom { max-width: 1200px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-    .footer-social { display: flex; gap: 16px; }
-    .footer-social a { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.2s; }
-    .footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--card-bg); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-header h3 { margin: 0; }
+    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
 
-    .auth-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-    .auth-overlay.active { display: flex; }
-    .auth-container { background: var(--white); border-radius: 24px; width: 100%; max-width: 1000px; max-height: 90vh; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; box-shadow: var(--shadow-lg); animation: fadeIn 0.4s ease-out; }
-    .auth-visual { background: linear-gradient(135deg, var(--primary), #1e40af); padding: 60px 40px; color: white; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
-    .auth-visual::before { content: ''; position: absolute; top: -50%; right: -50%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); border-radius: 50%; }
-    .auth-visual h2 { font-size: 28px; margin-bottom: 16px; position: relative; }
-    .auth-visual p { font-size: 14px; opacity: 0.9; line-height: 1.8; position: relative; }
-    .auth-visual-features { margin-top: 40px; position: relative; }
-    .auth-visual-feature { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .auth-visual-feature i { font-size: 20px; }
-    .auth-visual-feature span { font-size: 14px; }
-    .auth-form-wrapper { padding: 48px 40px; overflow-y: auto; position: relative; }
-    .auth-close { position: absolute; top: 20px; left: 20px; width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 18px; transition: all 0.2s; }
-    .auth-close:hover { background: var(--border); color: var(--text); }
-    .auth-header { margin-bottom: 32px; }
-    .auth-header h2 { font-size: 24px; margin-bottom: 8px; }
-    .auth-header p { font-size: 14px; color: var(--text-muted); }
-    .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--bg); padding: 4px; border-radius: 10px; }
-    .auth-tab { flex: 1; padding: 10px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-muted); transition: all 0.2s; }
-    .auth-tab.active { background: var(--white); color: var(--primary); box-shadow: var(--shadow); }
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
-    .form-input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px; font-size: 14px; transition: all 0.2s; background: var(--bg); }
-    .form-input:focus { outline: none; border-color: var(--primary); background: var(--white); }
-    .form-input::placeholder { color: #94a3b8; }
-    .form-input-icon { position: relative; }
-    .form-input-icon i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; }
-    .form-input-icon input { padding-right: 44px; }
-    .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 13px; }
-    .form-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-    .form-checkbox input { width: 18px; height: 18px; accent-color: var(--primary); }
-    .form-link { color: var(--primary); text-decoration: none; font-weight: 600; }
-    .form-link:hover { text-decoration: underline; }
-    .auth-divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: var(--text-muted); font-size: 13px; }
-    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .social-login { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .btn-social { padding: 12px; border-radius: 10px; border: 2px solid var(--border); background: var(--white); cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; color: var(--text); }
-    .btn-social:hover { background: var(--bg); border-color: var(--primary); }
-    .btn-social i { font-size: 18px; }
-    .btn-social.google i { color: #ea4335; }
-    .btn-social.microsoft i { color: #00a4ef; }
-    .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-muted); }
-    .auth-footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
-    .guest-access { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center; }
-    .guest-access p { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-    .btn-guest { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; box-shadow: 0 4px 14px rgba(245,158,11,0.3); }
-    .btn-guest:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
-    .verify-message { display: none; text-align: center; padding: 40px 20px; }
-    .verify-message.active { display: block; }
-    .verify-message i { font-size: 64px; color: var(--success); margin-bottom: 20px; }
-    .verify-message h3 { font-size: 22px; margin-bottom: 12px; }
-    .verify-message p { color: var(--text-muted); margin-bottom: 24px; }
+    /* RESPONSIVE */
+    @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .section-grid-3 { grid-template-columns: 1fr; } .section-grid-2 { grid-template-columns: 1fr; } .quick-actions-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1024px) { .sidebar { transform: translateX(100%); } .sidebar.open { transform: translateX(0); } .main { margin-right: 0; } .menu-toggle { display: block; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } .top-btn .label { display: none; } }
+    @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .quick-actions-grid { grid-template-columns: repeat(2, 1fr); } .search-box input { width: 180px; } .welcome-section { flex-direction: column; gap: 12px; } }
 
-    @media (max-width: 1024px) {
-      .hero-inner { grid-template-columns: 1fr; text-align: center; }
-      .hero-content p { margin: 0 auto 32px; }
-      .hero-buttons { justify-content: center; }
-      .hero-stats { justify-content: center; }
-      .hero-visual { display: none; }
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .steps-grid { grid-template-columns: repeat(2, 1fr); }
-      .plans-grid { grid-template-columns: 1fr; max-width: 400px; }
-      .plan-card.featured { transform: none; }
-      .testimonials-grid { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: repeat(2, 1fr); }
-      .auth-container { grid-template-columns: 1fr; }
-      .auth-visual { display: none; }
-      .nav-links { display: none; }
-      .mobile-menu-btn { display: block; }
-    }
-    @media (max-width: 768px) {
-      .hero-content h2 { font-size: 32px; }
-      .features-grid { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: 1fr; }
-      .step-card:not(:last-child)::after { display: none; }
-      .footer-grid { grid-template-columns: 1fr; }
-      .footer-bottom { flex-direction: column; gap: 16px; }
-      .navbar { padding: 0 20px; }
-      .hero, .features, .how-it-works, .plans, .testimonials, .cta { padding: 60px 20px; }
-    }
+    /* TOOLTIP */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--text-main); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    [data-tooltip]:hover::after { opacity: 1; }
   </style>
+<base target="_blank">
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar" id="navbar">
-  <div class="navbar-inner">
-    <a href="#" class="logo">
-      <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
-      <div class="logo-text">
-        <h1>IA PLATFORM</h1>
+<!-- Guest Banner -->
+<div class="guest-banner" id="guestBanner">
+  ⚠️ أنت في وضع الزائر. بعض الميزات محدودة. <a href="index.html" style="color: #92400e; text-decoration: underline;">تسجيل الدخول للوصول الكامل</a>
+</div>
+
+<script>
+// ======================
+// AUTH CHECK - حماية الصفحة
+// ======================
+(function() {
+  const session = JSON.parse(localStorage.getItem("auditSession"));
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Update user info when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    const userName = session.name || session.username;
+    const avatar = userName.charAt(0).toUpperCase();
+
+    // Update sidebar
+    const sidebarName = document.querySelector('.sidebar-footer div div:first-child');
+    const sidebarAvatar = document.querySelector('.sidebar-footer .avatar');
+    if (sidebarName) sidebarName.textContent = userName;
+    if (sidebarAvatar) sidebarAvatar.textContent = avatar;
+
+    // Update top bar
+    const topName = document.querySelector('.user-profile .name');
+    const topAvatar = document.querySelector('.user-profile .avatar');
+    if (topName) topName.textContent = userName;
+    if (topAvatar) topAvatar.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23475569' rx='18'/%3E%3Ctext x='18' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3E' + avatar + '%3C/text%3E%3C/svg%3E" alt="Profile">';
+
+    // Update welcome title
+    const welcomeTitle = document.querySelector('.welcome-text h2');
+    if (welcomeTitle) welcomeTitle.textContent = 'مرحباً ' + userName + ' 👋';
+
+    // Guest restrictions
+    if (session.role === "guest") {
+      document.getElementById('guestBanner').classList.add('active');
+      // Disable quick actions for guest
+      document.querySelectorAll('.quick-action-item').forEach(item => {
+        item.style.opacity = '0.5';
+        item.style.pointerEvents = 'none';
+      });
+    }
+  });
+})();
+
+function logout() {
+  localStorage.removeItem("auditSession");
+  window.location.href = "index.html";
+}
+</script>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i class="fas fa-shield-alt"></i></div>
+      <div class="sidebar-brand">
+        <h2>IA PLATFORM</h2>
         <span>Internal Audit Excellence</span>
       </div>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#features">المميزات</a></li>
-      <li><a href="#how-it-works">كيف يعمل</a></li>
-      <li><a href="#plans">الخطط</a></li>
-      <li><a href="#testimonials">آراء العملاء</a></li>
+    </div>
+
+    <ul class="menu" id="mainMenu">
+      <li class="active" data-page="dashboard" onclick="navigateTo('dashboard', this)">
+        <i class="fas fa-home"></i>
+        <span>لوحة التحكم<br><small>Dashboard</small></span>
+      </li>
+      <li data-page="annual-plan" onclick="navigateTo('annual-plan', this)">
+        <i class="fas fa-calendar-alt"></i>
+        <span>الخطة السنوية للتدقيق<br><small>Annual Audit Plan</small></span>
+      </li>
+      <li data-page="engagements" onclick="navigateTo('engagements', this)">
+        <i class="fas fa-clipboard-list"></i>
+        <span>مهام التدقيق<br><small>Audit Engagements</small></span>
+      </li>
+      <li data-page="risk-register" onclick="navigateTo('risk-register', this)">
+        <i class="fas fa-shield-alt"></i>
+        <span>سجل المخاطر<br><small>Risk Register</small></span>
+      </li>
+      <li data-page="findings" onclick="navigateTo('findings', this)">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>الملاحظات والتوصيات<br><small>Findings & Recommendations</small></span>
+      </li>
+      <li data-page="corrective" onclick="navigateTo('corrective', this)">
+        <i class="fas fa-check-circle"></i>
+        <span>متابعة الإجراءات التصحيحية<br><small>Corrective Action Tracking</small></span>
+      </li>
+      <li data-page="reports" onclick="navigateTo('reports', this)">
+        <i class="fas fa-file-alt"></i>
+        <span>التقارير<br><small>Reports</small></span>
+      </li>
+      <li data-page="evidence" onclick="navigateTo('evidence', this)">
+        <i class="fas fa-folder-open"></i>
+        <span>مركز الأدلة<br><small>Evidence Center</small></span>
+      </li>
+      <li data-page="academy" onclick="navigateTo('academy', this)">
+        <i class="fas fa-graduation-cap"></i>
+        <span>أكاديمية التدقيق<br><small>Audit Academy</small></span>
+      </li>
+      <li data-page="settings" onclick="navigateTo('settings', this)">
+        <i class="fas fa-cog"></i>
+        <span>الإعدادات<br><small>Settings</small></span>
+      </li>
     </ul>
-    <div class="nav-actions">
-      <button class="btn btn-ghost" onclick="openAuth('login')">تسجيل الدخول</button>
-      <button class="btn btn-primary" onclick="openAuth('register')">ابدأ مجاناً</button>
-    </div>
-    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
-  </div>
-</nav>
 
-<!-- Hero Section -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-content">
-      <h2 class="animate-fade">منصة متكاملة لـ <span>التدقيق الداخلي</span></h2>
-      <p class="animate-fade delay-1">إدارة مهام التدقيق، المخاطر، التوصيات، والإجراءات التصحيحية في منصة واحدة ذكية وآمنة</p>
-      <div class="hero-buttons animate-fade delay-2">
-        <button class="btn btn-primary btn-large" onclick="openAuth('register')">
-          <i class="fas fa-rocket"></i> ابدأ تجربتك المجانية
-        </button>
-        <button class="btn btn-outline btn-large" onclick="enterAsGuest()">
-          <i class="fas fa-user"></i> دخول كزائر
-        </button>
+    <div class="sidebar-bottom">
+      <div class="sidebar-bottom-item" onclick="toggleSidebarCollapse()">
+        <i class="fas fa-angle-double-right"></i>
+        <span>طي القائمة<br>Collapse</span>
       </div>
-      <div class="hero-stats animate-fade delay-3">
-        <div class="hero-stat"><div class="number">500+</div><div class="label">شركة تستخدم المنصة</div></div>
-        <div class="hero-stat"><div class="number">10K+</div><div class="label">مهمة تدقيق مكتملة</div></div>
-        <div class="hero-stat"><div class="number">98%</div><div class="label">رضا العملاء</div></div>
+      <div class="sidebar-bottom-item" onclick="toggleLightMode()">
+        <i class="fas fa-sun"></i>
+        <span>الوضع الفاتح<br>Light Mode</span>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="hero-card">
-        <div class="hero-card-header">
-          <span class="hero-card-title">تقدم الخطة السنوية</span>
-          <span class="hero-card-badge">+12%</span>
+
+    <div class="sidebar-footer">
+      <div class="avatar">أ</div>
+      <div>
+        <div style="color:#f8fafc; font-weight:500;">أحمد الشمري</div>
+        <div>Chief Audit Executive</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="search-box">
+          <input type="text" placeholder="بحث سريع / Search..." id="globalSearch" onkeyup="handleSearch(event)">
+          <i class="fas fa-search"></i>
+          <span class="search-shortcut">Ctrl + K</span>
         </div>
-        <div style="margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>مكتمل</span><span style="color: var(--primary); font-weight: 600;">76%</span></div>
-          <div class="hero-chart-bar"><div class="hero-chart-fill" style="width: 76%;"></div></div>
+      </div>
+      <div class="top-bar-right">
+        <button class="top-btn" onclick="openAIAssistant()">
+          <i class="fas fa-robot"></i>
+          <div class="label">
+            <span>AI Assistant</span>
+            <small>المساعد الذكي</small>
+          </div>
+        </button>
+        <button class="top-btn" onclick="openAuditAcademy()">
+          <i class="fas fa-graduation-cap"></i>
+          <div class="label">
+            <span>Audit Academy</span>
+            <small>أكاديمية التدقيق</small>
+          </div>
+        </button>
+        <div class="top-icon" data-tooltip="الإشعارات" onclick="showNotifications()">
+          <i class="fas fa-bell"></i><span class="badge-count">5</span>
         </div>
-        <div style="margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>قيد التنفيذ</span><span style="color: var(--success); font-weight: 600;">14%</span></div>
-          <div class="hero-chart-bar"><div class="hero-chart-fill" style="width: 14%; background: var(--success);"></div></div>
+        <div class="lang-switch" onclick="toggleLanguage()">
+          <i class="fas fa-globe"></i>
+          <div>
+            <div>العربية</div>
+            <div style="font-size:10px; color:var(--text-muted);">English</div>
+          </div>
         </div>
+        <div class="user-profile" onclick="showProfile()">
+          <div class="avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23475569' rx='18'/%3E%3Ctext x='18' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3Eأ%3C/text%3E%3C/svg%3E" alt="Profile"></div>
+          <div class="user-info">
+            <div class="name">أحمد الشمري</div>
+            <div class="role">مدير التدقيق الداخلي · Chief Audit Executive</div>
+          </div>
+          <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i>
+        </div>
+      
+                <button class="top-btn" onclick="logout()" style="color: var(--danger);">
+          <i class="fas fa-sign-out-alt"></i>
+          <div class="label"><span>خروج</span><small>Logout</small></div>
+        </button>
+</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="mainContent">
+
+      <!-- Welcome Section -->
+      <div class="welcome-section">
+        <div class="welcome-text">
+          <h2>مرحباً أحمد 👋</h2>
+          <p>Welcome back, Ahmed</p>
+        </div>
+        <div class="date-display">
+          <i class="far fa-calendar-alt"></i>
+          <div class="date-text">
+            <div class="ar">الأحد، 1 يونيو 2026</div>
+            <div class="en">Sunday, 1 June 2026</div>
+          </div>
+          <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i>
+        </div>
+      </div>
+
+      <!-- KPI Section Title -->
+      <div class="kpi-section-title">
+        نظرة عامة على الأداء
+        <small>Performance Overview</small>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card" onclick="filterByStatus('plan-progress')" data-tooltip="عرض تفاصيل الخطة">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon blue"><i class="fas fa-clipboard-check"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--primary);">76%</div>
+              <div class="kpi-label">تنفيذ الخطة السنوية</div>
+              <div class="kpi-label-en">Audit Plan Progress</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:76%; background:var(--primary);"></div></div>
+            <div class="kpi-progress-text">100% من 100%</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatus('open')" data-tooltip="عرض المهام المفتوحة">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon green"><i class="fas fa-clipboard-list"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--success);">18</div>
+              <div class="kpi-label">المهام المفتوحة</div>
+              <div class="kpi-label-en">Open Engagements</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:75%; background:var(--success);"></div></div>
+            <div class="kpi-progress-text">إجمالي 24 من Total</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatus('overdue')" data-tooltip="عرض المهام المتأخرة">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon orange"><i class="fas fa-hourglass-half"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--warning);">6</div>
+              <div class="kpi-label">المهام المتأخرة</div>
+              <div class="kpi-label-en">Overdue Engagements</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:25%; background:var(--warning);"></div></div>
+            <div class="kpi-progress-text">إجمالي 24 من Total</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterByStatus('high-risk')" data-tooltip="عرض المخاطر العالية">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:var(--danger);">7</div>
+              <div class="kpi-label">المخاطر العالية</div>
+              <div class="kpi-label-en">High Risks</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:17%; background:var(--danger);"></div></div>
+            <div class="kpi-progress-text">إجمالي 42 من Total</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="openPage('findings')" data-tooltip="عرض نسبة التنفيذ">
+          <div class="kpi-card-inner">
+            <div class="kpi-icon purple"><i class="fas fa-chart-line"></i></div>
+            <div class="kpi-content">
+              <div class="kpi-value" style="color:#9333ea;">82%</div>
+              <div class="kpi-label">تنفيذ التوصيات</div>
+              <div class="kpi-label-en">Recommendations Implementation</div>
+            </div>
+          </div>
+          <div class="kpi-progress">
+            <div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:82%; background:#9333ea;"></div></div>
+            <div class="kpi-progress-text">100% من 100%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: My Today + Needs Attention + Overall Progress -->
+      <div class="section-grid-3">
+        <!-- My Today -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>مهامي اليوم</h3>
+              <span class="subtitle">My Today</span>
+            </div>
+            <a href="#" onclick="viewAllTasks()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+          </div>
+          <ul class="tasks-list">
+            <li onclick="openTask('procurement-review')">
+              <div class="task-time">
+                <div class="time">09:00</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon blue"><i class="fas fa-clipboard-check"></i></div>
+              <div class="task-info">
+                <div class="title">مراجعة عمليات المشتريات</div>
+                <div class="subtitle">Review Procurement Process</div>
+              </div>
+              <span class="task-badge badge-review">مراجعة</span>
+              <span class="task-code">ENG-2026-015</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('inventory-approval')">
+              <div class="task-time">
+                <div class="time">11:00</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="task-info">
+                <div class="title">اعتماد تقرير المخزون</div>
+                <div class="subtitle">Approve Inventory Report</div>
+              </div>
+              <span class="task-badge badge-approval">اعتماد</span>
+              <span class="task-code">ENG-2026-008</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('upload-evidence')">
+              <div class="task-time">
+                <div class="time">14:00</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon orange"><i class="fas fa-cloud-upload-alt"></i></div>
+              <div class="task-info">
+                <div class="title">رفع الأدلة المطلوبة</div>
+                <div class="subtitle">Upload Required Evidence</div>
+              </div>
+              <span class="task-badge badge-evidence">أدلة</span>
+              <span class="task-code">ENG-2026-023</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('finance-meeting')">
+              <div class="task-time">
+                <div class="time">15:30</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon purple"><i class="fas fa-users"></i></div>
+              <div class="task-info">
+                <div class="title">اجتماع مع إدارة المالية</div>
+                <div class="subtitle">Meeting with Finance Dept.</div>
+              </div>
+              <span class="task-badge badge-meeting">اجتماع</span>
+              <span class="task-code">ENG-2026-011</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+            <li onclick="openTask('corrective-review')">
+              <div class="task-time">
+                <div class="time">16:30</div>
+                <div class="day">اليوم</div>
+              </div>
+              <div class="task-icon teal"><i class="fas fa-tasks"></i></div>
+              <div class="task-info">
+                <div class="title">مراجعة إجراء تصحيحي</div>
+                <div class="subtitle">Review Corrective Action</div>
+              </div>
+              <span class="task-badge badge-followup">متابعة</span>
+              <span class="task-code">CAP-2026-004</span>
+              <i class="fas fa-chevron-left task-arrow"></i>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Needs Attention -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>يحتاج اهتماماً</h3>
+              <span class="subtitle">Needs Attention</span>
+            </div>
+            <a href="#" onclick="viewAllAttention()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+          </div>
+          <ul class="attention-list">
+            <li onclick="openAttention('high-risks')">
+              <div class="attention-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="attention-info">
+                <div class="title">مخاطر عالية</div>
+                <div class="subtitle">High Risks</div>
+              </div>
+              <div class="attention-count">7</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+            <li onclick="openAttention('overdue')">
+              <div class="attention-icon orange"><i class="fas fa-hourglass-half"></i></div>
+              <div class="attention-info">
+                <div class="title">مهام متأخرة</div>
+                <div class="subtitle">Overdue Engagements</div>
+              </div>
+              <div class="attention-count" style="color:var(--warning);">6</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+            <li onclick="openAttention('missing-evidence')">
+              <div class="attention-icon yellow"><i class="fas fa-folder-open"></i></div>
+              <div class="attention-info">
+                <div class="title">أدلة مفقودة</div>
+                <div class="subtitle">Missing Evidence</div>
+              </div>
+              <div class="attention-count" style="color:var(--warning);">9</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+            <li onclick="openAttention('pending-approvals')">
+              <div class="attention-icon blue"><i class="fas fa-clock"></i></div>
+              <div class="attention-info">
+                <div class="title">اعتمادات معلقة</div>
+                <div class="subtitle">Pending Approvals</div>
+              </div>
+              <div class="attention-count" style="color:var(--primary);">4</div>
+              <i class="fas fa-chevron-left attention-arrow"></i>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Overall Progress + Recent Reports -->
         <div>
-          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>متأخر</span><span style="color: var(--warning); font-weight: 600;">6%</span></div>
-          <div class="hero-chart-bar"><div class="hero-chart-fill" style="width: 6%; background: var(--warning);"></div></div>
+          <!-- Overall Progress -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div>
+                <h3>التقدم العام</h3>
+                <span class="subtitle">Overall Progress</span>
+              </div>
+              <a href="#" onclick="viewReport()">عرض التقرير <i class="fas fa-arrow-left"></i></a>
+            </div>
+            <div class="progress-chart-wrapper">
+              <div class="progress-chart-container">
+                <canvas id="progressChart"></canvas>
+              </div>
+              <div class="progress-legend">
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#2563eb;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">مكتمل</div>
+                    <div class="label-en">Completed</div>
+                  </div>
+                  <div class="progress-legend-value">76%</div>
+                </div>
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#22c55e;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">قيد التنفيذ</div>
+                    <div class="label-en">In Progress</div>
+                  </div>
+                  <div class="progress-legend-value">14%</div>
+                </div>
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#f59e0b;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">متأخر</div>
+                    <div class="label-en">Overdue</div>
+                  </div>
+                  <div class="progress-legend-value">6%</div>
+                </div>
+                <div class="progress-legend-item">
+                  <div class="progress-legend-dot" style="background:#9ca3af;"></div>
+                  <div class="progress-legend-info">
+                    <div class="label">ملغى</div>
+                    <div class="label-en">Cancelled</div>
+                  </div>
+                  <div class="progress-legend-value">4%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Reports -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>أحدث التقارير</h3>
+                <span class="subtitle">Recent Reports</span>
+              </div>
+              <a href="#" onclick="viewAllReports()">عرض الكل <i class="fas fa-arrow-left"></i></a>
+            </div>
+            <ul class="reports-list">
+              <li onclick="openReport('procurement')">
+                <div class="report-icon blue"><i class="fas fa-file-alt"></i></div>
+                <div class="report-info">
+                  <div class="title">تقرير تدقيق المشتريات</div>
+                  <div class="subtitle">Procurement Audit Report</div>
+                </div>
+                <div class="report-meta">
+                  <div class="date">31/05/2026</div>
+                  <span class="status-badge status-completed">مكتمل</span>
+                </div>
+              </li>
+              <li onclick="openReport('inventory')">
+                <div class="report-icon green"><i class="fas fa-file-alt"></i></div>
+                <div class="report-info">
+                  <div class="title">تقرير تدقيق المخزون</div>
+                  <div class="subtitle">Inventory Audit Report</div>
+                </div>
+                <div class="report-meta">
+                  <div class="date">30/05/2026</div>
+                  <span class="status-badge status-completed">مكتمل</span>
+                </div>
+              </li>
+              <li onclick="openReport('hr')">
+                <div class="report-icon orange"><i class="fas fa-file-alt"></i></div>
+                <div class="report-info">
+                  <div class="title">تقرير تدقيق الموارد البشرية</div>
+                  <div class="subtitle">HR Audit Report</div>
+                </div>
+                <div class="report-meta">
+                  <div class="date">28/05/2026</div>
+                  <span class="status-badge status-progress">قيد التنفيذ</span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-      <div class="hero-floating-icon icon-1"><i class="fas fa-check-circle"></i></div>
-      <div class="hero-floating-icon icon-2"><i class="fas fa-chart-line"></i></div>
-      <div class="hero-floating-icon icon-3"><i class="fas fa-shield-alt"></i></div>
-    </div>
-  </div>
-</section>
 
-<!-- Features Section -->
-<section class="features" id="features">
-  <div class="section-header animate-fade">
-    <h2>كل ما تحتاجه في منصة واحدة</h2>
-    <p>حلول متكاملة تغطي جميع جوانب عملية التدقيق الداخلي بكفاءة واحترافية</p>
-  </div>
-  <div class="features-grid">
-    <div class="feature-card animate-fade delay-1">
-      <div class="feature-icon blue"><i class="fas fa-clipboard-list"></i></div>
-      <h3>إدارة المهام</h3>
-      <p>تخطيط وتنفيذ ومتابعة جميع مهام التدقيق بسهولة مع جدولة ذكية وتنبيهات تلقائية</p>
-    </div>
-    <div class="feature-card animate-fade delay-2">
-      <div class="feature-icon green"><i class="fas fa-shield-alt"></i></div>
-      <h3>سجل المخاطر</h3>
-      <p>تقييم المخاطر وتحليلها وتصنيفها مع لوحات تحكم تفاعلية وخرائط حرارية</p>
-    </div>
-    <div class="feature-card animate-fade delay-3">
-      <div class="feature-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
-      <h3>الملاحظات والتوصيات</h3>
-      <p>توثيق الملاحظات وإصدار التوصيات ومتابعة تنفيذها مع تقارير تفصيلية</p>
-    </div>
-    <div class="feature-card animate-fade delay-1">
-      <div class="feature-icon purple"><i class="fas fa-check-double"></i></div>
-      <h3>الإجراءات التصحيحية</h3>
-      <p>متابعة الإجراءات التصحيحية من البداية حتى الإغلاق مع التنبيهات المتأخرة</p>
-    </div>
-    <div class="feature-card animate-fade delay-2">
-      <div class="feature-icon red"><i class="fas fa-file-alt"></i></div>
-      <h3>التقارير الذكية</h3>
-      <p>إنشاء تقارير احترافية تلقائية مع قوالب جاهزة وتحليلات بصرية متقدمة</p>
-    </div>
-    <div class="feature-card animate-fade delay-3">
-      <div class="feature-icon teal"><i class="fas fa-graduation-cap"></i></div>
-      <h3>أكاديمية التدقيق</h3>
-      <p>تدريب وتطوير فريق التدقيق مع شهادات معتمدة واختبارات تقييمية</p>
-    </div>
-  </div>
-</section>
-
-<!-- How It Works -->
-<section class="how-it-works" id="how-it-works">
-  <div class="section-header animate-fade">
-    <h2>كيف تعمل المنصة؟</h2>
-    <p>أربع خطوات بسيطة لتحويل عملية التدقيق لديك</p>
-  </div>
-  <div class="steps-grid">
-    <div class="step-card animate-fade delay-1"><div class="step-number">1</div><h3>أنشئ خطتك</h3><p>حدد أهداف التدقيق السنوية ووزع المهام على الفريق</p></div>
-    <div class="step-card animate-fade delay-2"><div class="step-number">2</div><h3>نفذ المهام</h3><p>تابع سير العمل مع جدولة ذكية وتنبيهات تلقائية</p></div>
-    <div class="step-card animate-fade delay-3"><div class="step-number">3</div><h3>سجل النتائج</h3><p>وثق الملاحظات والتوصيات والمخاطر المكتشفة</p></div>
-    <div class="step-card animate-fade delay-4"><div class="step-number">4</div><h3>تابع التحسين</h3><p>راقب الإجراءات التصحيحية وقيس الأداء باستمرار</p></div>
-  </div>
-</section>
-
-<!-- Plans Section -->
-<section class="plans" id="plans">
-  <div class="section-header animate-fade">
-    <h2>اختر الخطة المناسبة لك</h2>
-    <p>خطط مرنة تناسب جميع الأحجام مع إمكانية التجربة المجانية</p>
-  </div>
-  <div class="plans-grid">
-    <div class="plan-card animate-fade delay-1">
-      <h3>البداية</h3>
-      <div class="plan-price">مجاناً <span>/ للأبد</span></div>
-      <ul class="plan-features">
-        <li><i class="fas fa-check"></i> 3 مهام تدقيق نشطة</li>
-        <li><i class="fas fa-check"></i> سجل مخاطر أساسي</li>
-        <li><i class="fas fa-check"></i> تقارير PDF</li>
-        <li><i class="fas fa-check"></i> دعم عبر البريد</li>
-        <li><i class="fas fa-check"></i> مستخدم واحد</li>
-      </ul>
-      <button class="btn btn-outline btn-full" onclick="openAuth('register')">سجل مجاناً</button>
-    </div>
-    <div class="plan-card featured animate-fade delay-2">
-      <div class="plan-badge">الأكثر شيوعاً</div>
-      <h3>المحترف</h3>
-      <div class="plan-price">$49 <span>/ شهرياً</span></div>
-      <ul class="plan-features">
-        <li><i class="fas fa-check"></i> مهام تدقيق غير محدودة</li>
-        <li><i class="fas fa-check"></i> سجل مخاطر متقدم</li>
-        <li><i class="fas fa-check"></i> تقارير تفاعلية</li>
-        <li><i class="fas fa-check"></i> دعم فوري 24/7</li>
-        <li><i class="fas fa-check"></i> حتى 10 مستخدمين</li>
-        <li><i class="fas fa-check"></i> أكاديمية التدقيق</li>
-      </ul>
-      <button class="btn btn-primary btn-full" onclick="openAuth('register')">ابدأ الآن</button>
-    </div>
-    <div class="plan-card animate-fade delay-3">
-      <h3>المؤسسات</h3>
-      <div class="plan-price">$199 <span>/ شهرياً</span></div>
-      <ul class="plan-features">
-        <li><i class="fas fa-check"></i> كل مميزات المحترف</li>
-        <li><i class="fas fa-check"></i> مستخدمين غير محدود</li>
-        <li><i class="fas fa-check"></i> API للتكامل</li>
-        <li><i class="fas fa-check"></i> مدير حساب مخصص</li>
-        <li><i class="fas fa-check"></i> تخصيص كامل</li>
-        <li><i class="fas fa-check"></i> استضافة خاصة</li>
-      </ul>
-      <button class="btn btn-outline btn-full" onclick="openAuth('register')">تواصل معنا</button>
-    </div>
-  </div>
-</section>
-
-<!-- Testimonials -->
-<section class="testimonials" id="testimonials">
-  <div class="section-header animate-fade">
-    <h2>ماذا يقول عملاؤنا؟</h2>
-    <p>ثقة مئات الشركات في منصتنا لتحسين عمليات التدقيق الداخلي</p>
-  </div>
-  <div class="testimonials-grid">
-    <div class="testimonial-card animate-fade delay-1">
-      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-      <p class="testimonial-text">"حولت المنصة عملية التدقيق لدينا بالكامل. أصبحنا نستطيع متابعة جميع المهام والمخاطر في لوحة واحدة واضحة."</p>
-      <div class="testimonial-author"><div class="testimonial-avatar">ع</div><div class="testimonial-info"><h4>عبدالله الراشد</h4><span>مدير التدقيق - بنك الرياض</span></div></div>
-    </div>
-    <div class="testimonial-card animate-fade delay-2">
-      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-      <p class="testimonial-text">"أفضل استثمار قمنا به. التقارير الذكية وفرت لنا 60% من الوقت المستهلك في إعداد التقارير اليدوية."</p>
-      <div class="testimonial-author"><div class="testimonial-avatar">ف</div><div class="testimonial-info"><h4>فهد المطيري</h4><span>رئيس التدقيق - stc</span></div></div>
-    </div>
-    <div class="testimonial-card animate-fade delay-3">
-      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-      <p class="testimonial-text">"أكاديمية التدقيق ساعدت فريقي على التطور المهني بشكل ملحوظ. الشهادات المعتمدة أضافت قيمة كبيرة."</p>
-      <div class="testimonial-author"><div class="testimonial-avatar">ن</div><div class="testimonial-info"><h4>نورة القحطاني</h4><span>مديرة ضمان الجودة - أرامكو</span></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA Section -->
-<section class="cta">
-  <h2 class="animate-fade">ابدأ رحلة التحول الرقمي اليوم</h2>
-  <p class="animate-fade delay-1">انضم إلى 500+ شركة تثق بمنصتنا لإدارة التدقيق الداخلي</p>
-  <div class="cta-buttons animate-fade delay-2">
-    <button class="btn btn-white btn-large" onclick="openAuth('register')"><i class="fas fa-rocket"></i> ابدأ مجاناً لمدة 14 يوم</button>
-    <button class="btn btn-transparent btn-large" onclick="enterAsGuest()"><i class="fas fa-user"></i> جرب كزائر</button>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer class="landing-footer">
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <h3><i class="fas fa-shield-alt" style="color: var(--primary); margin-left: 8px;"></i>IA PLATFORM</h3>
-      <p>منصة متكاملة لإدارة التدقيق الداخلي بكفاءة واحترافية. نساعد المؤسسات على تحسين الحوكمة وإدارة المخاطر وضمان الامتثال.</p>
-    </div>
-    <div class="footer-links">
-      <h4>المنتج</h4>
-      <ul><li><a href="#features">المميزات</a></li><li><a href="#plans">الأسعار</a></li><li><a href="#">التحديثات</a></li><li><a href="#">API</a></li></ul>
-    </div>
-    <div class="footer-links">
-      <h4>الشركة</h4>
-      <ul><li><a href="#">من نحن</a></li><li><a href="#">الوظائف</a></li><li><a href="#">المدونة</a></li><li><a href="#">اتصل بنا</a></li></ul>
-    </div>
-    <div class="footer-links">
-      <h4>الدعم</h4>
-      <ul><li><a href="#">مركز المساعدة</a></li><li><a href="#">الشروط والأحكام</a></li><li><a href="#">سياسة الخصوصية</a></li><li><a href="#">الأمان</a></li></ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div>© 2026 IA Platform. جميع الحقوق محفوظة.</div>
-    <div class="footer-social">
-      <a href="#"><i class="fab fa-twitter"></i></a>
-      <a href="#"><i class="fab fa-linkedin-in"></i></a>
-      <a href="#"><i class="fab fa-youtube"></i></a>
-      <a href="#"><i class="fab fa-github"></i></a>
-    </div>
-  </div>
-</footer>
-
-<!-- Auth Modal -->
-<div class="auth-overlay" id="authOverlay" onclick="closeAuth(event)">
-  <div class="auth-container" onclick="event.stopPropagation()">
-    <div class="auth-visual">
-      <h2>انضم إلى مستقبل التدقيق الداخلي</h2>
-      <p>منصة ذكية تجمع كل ما تحتاجه لإدارة التدقيق بكفاءة واحترافية</p>
-      <div class="auth-visual-features">
-        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>إدارة مهام متكاملة</span></div>
-        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>تقارير ذكية تلقائية</span></div>
-        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>تكامل مع الأنظمة</span></div>
-        <div class="auth-visual-feature"><i class="fas fa-check-circle"></i><span>دعم فني 24/7</span></div>
-      </div>
-    </div>
-    <div class="auth-form-wrapper">
-      <button class="auth-close" onclick="closeAuth()">&times;</button>
-
-      <!-- Login Form -->
-      <div id="loginForm">
-        <div class="auth-header"><h2>تسجيل الدخول</h2><p>أدخل بياناتك للوصول إلى حسابك</p></div>
-        <div class="auth-tabs">
-          <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
-          <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
-        </div>
-        <form onsubmit="handleLogin(event)">
-          <div class="form-group">
-            <label class="form-label">البريد الإلكتروني</label>
-            <div class="form-input-icon"><i class="fas fa-envelope"></i><input type="email" class="form-input" placeholder="your@email.com" required></div>
+      <!-- Row: Quick Actions + Knowledge Score -->
+      <div class="section-grid-2">
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>إجراءات سريعة</h3>
+              <span class="subtitle">Quick Actions</span>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">كلمة المرور</label>
-            <div class="form-input-icon"><i class="fas fa-lock"></i><input type="password" class="form-input" placeholder="••••••••" required></div>
+          <div class="quick-actions-grid">
+            <div class="quick-action-item" onclick="quickAction('new-engagement')">
+              <div class="quick-icon" style="background:#dbeafe; color:var(--primary);"><i class="fas fa-plus-circle"></i></div>
+              <div class="quick-label">مهمة تدقيق جديدة<small>New Engagement</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('new-report')">
+              <div class="quick-icon" style="background:#dcfce7; color:var(--success);"><i class="fas fa-file-medical"></i></div>
+              <div class="quick-label">تقرير جديد<small>New Report</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('add-finding')">
+              <div class="quick-icon" style="background:#fef3c7; color:var(--warning);"><i class="fas fa-plus-square"></i></div>
+              <div class="quick-label">إضافة ملاحظة<small>Add Finding</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('upload-evidence')">
+              <div class="quick-icon" style="background:#f3e8ff; color:#9333ea;"><i class="fas fa-cloud-upload-alt"></i></div>
+              <div class="quick-label">رفع دليل<small>Upload Evidence</small></div>
+            </div>
+            <div class="quick-action-item" onclick="quickAction('followup-action')">
+              <div class="quick-icon" style="background:#ccfbf1; color:#0d9488;"><i class="fas fa-check-double"></i></div>
+              <div class="quick-label">متابعة إجراء تصحيحي<small>Follow up Action</small></div>
+            </div>
           </div>
-          <div class="form-options">
-            <label class="form-checkbox"><input type="checkbox"> تذكرني</label>
-            <a href="#" class="form-link" onclick="showForgotPassword()">نسيت كلمة المرور؟</a>
+        </div>
+
+        <!-- Knowledge Score -->
+        <div class="knowledge-card">
+          <div class="knowledge-header">
+            <div>
+              <h3>مؤشر المعرفة</h3>
+              <span class="subtitle">Knowledge Score</span>
+            </div>
+            <a href="#" onclick="goToAcademy()">عرض الأكاديمية <i class="fas fa-arrow-left"></i></a>
           </div>
-          <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
-        </form>
-        <div class="auth-divider">أو</div>
-        <div class="social-login">
-          <button class="btn-social google" onclick="socialLogin('google')"><i class="fab fa-google"></i> Google</button>
-          <button class="btn-social microsoft" onclick="socialLogin('microsoft')"><i class="fab fa-microsoft"></i> Microsoft</button>
+          <div class="knowledge-body">
+            <div>
+              <div class="gauge-container">
+                <canvas id="knowledgeGauge" width="140" height="100"></canvas>
+                <div class="gauge-value">
+                  <div class="percent">84%</div>
+                  <div class="label">إجمالي التقدم</div>
+                </div>
+              </div>
+              <div class="gauge-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+            </div>
+            <div class="knowledge-stats">
+              <div class="knowledge-stat">
+                <span class="label">المستوى الحالي</span>
+                <span class="value">Advanced</span>
+              </div>
+              <div class="knowledge-stat">
+                <span class="label">الاختبارات المكتملة</span>
+                <span class="value">24 / 30</span>
+              </div>
+              <div class="knowledge-stat">
+                <span class="label">الشهادات المتحققة</span>
+                <span class="value">6</span>
+              </div>
+              <div class="knowledge-stat">
+                <span class="label">النقاط</span>
+                <span class="value">2,450</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="guest-access">
-          <p>تريد تجربة المنصة أولاً؟</p>
-          <button class="btn btn-guest btn-full" onclick="enterAsGuest()"><i class="fas fa-user"></i> دخول كزائر</button>
-        </div>
-        <div class="auth-footer">ليس لديك حساب؟ <a href="#" onclick="switchAuthTab('register')">سجل الآن</a></div>
       </div>
 
-      <!-- Register Form -->
-      <div id="registerForm" style="display: none;">
-        <div class="auth-header"><h2>إنشاء حساب جديد</h2><p>ابدأ رحلتك مع منصة التدقيق الذكية</p></div>
-        <div class="auth-tabs">
-          <button class="auth-tab" onclick="switchAuthTab('login')">تسجيل الدخول</button>
-          <button class="auth-tab active" onclick="switchAuthTab('register')">حساب جديد</button>
-        </div>
-        <form onsubmit="handleRegister(event)">
-          <div class="form-group">
-            <label class="form-label">الاسم الكامل</label>
-            <div class="form-input-icon"><i class="fas fa-user"></i><input type="text" class="form-input" placeholder="محمد العتيبي" required></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">البريد الإلكتروني</label>
-            <div class="form-input-icon"><i class="fas fa-envelope"></i><input type="email" class="form-input" placeholder="your@email.com" required></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">الشركة / المؤسسة</label>
-            <div class="form-input-icon"><i class="fas fa-building"></i><input type="text" class="form-input" placeholder="اسم الشركة"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">كلمة المرور</label>
-            <div class="form-input-icon"><i class="fas fa-lock"></i><input type="password" class="form-input" placeholder="••••••••" required></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">تأكيد كلمة المرور</label>
-            <div class="form-input-icon"><i class="fas fa-lock"></i><input type="password" class="form-input" placeholder="••••••••" required></div>
-          </div>
-          <div class="form-options">
-            <label class="form-checkbox"><input type="checkbox" required> أوافق على <a href="#" class="form-link">الشروط والأحكام</a></label>
-          </div>
-          <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-user-plus"></i> إنشاء الحساب</button>
-        </form>
-        <div class="auth-divider">أو</div>
-        <div class="social-login">
-          <button class="btn-social google" onclick="socialLogin('google')"><i class="fab fa-google"></i> Google</button>
-          <button class="btn-social microsoft" onclick="socialLogin('microsoft')"><i class="fab fa-microsoft"></i> Microsoft</button>
-        </div>
-        <div class="guest-access">
-          <p>تريد تجربة المنصة أولاً؟</p>
-          <button class="btn btn-guest btn-full" onclick="enterAsGuest()"><i class="fas fa-user"></i> دخول كزائر</button>
-        </div>
-        <div class="auth-footer">لديك حساب بالفعل؟ <a href="#" onclick="switchAuthTab('login')">تسجيل الدخول</a></div>
-      </div>
-
-      <!-- Forgot Password -->
-      <div id="forgotForm" style="display: none;">
-        <div class="auth-header"><h2>استعادة كلمة المرور</h2><p>أدخل بريدك الإلكتروني لإرسال رابط الاستعادة</p></div>
-        <form onsubmit="handleForgotPassword(event)">
-          <div class="form-group">
-            <label class="form-label">البريد الإلكتروني</label>
-            <div class="form-input-icon"><i class="fas fa-envelope"></i><input type="email" class="form-input" placeholder="your@email.com" required></div>
-          </div>
-          <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-paper-plane"></i> إرسال رابط الاستعادة</button>
-        </form>
-        <div class="auth-footer"><a href="#" class="form-link" onclick="switchAuthTab('login')">← العودة لتسجيل الدخول</a></div>
-      </div>
-
-      <!-- Verification Message -->
-      <div class="verify-message" id="verifyMessage">
-        <i class="fas fa-envelope-open-text"></i>
-        <h3>تحقق من بريدك الإلكتروني</h3>
-        <p>تم إرسال رابط التفعيل إلى بريدك الإلكتروني. يرجى النقر على الرابط لتفعيل حسابك.</p>
-        <button class="btn btn-primary" onclick="switchAuthTab('login')"><i class="fas fa-sign-in-alt"></i> الذهاب إلى تسجيل الدخول</button>
-      </div>
     </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div>© 2026 IA Platform. All rights reserved.</div>
+      <div>جميع البيانات محدثة حتى 1 يونيو 2026، 08:30 صباحاً · All data is updated till 1 June 2026, 08:30 AM</div>
+      <div>الإصدار 1.0.0 · Version 1.0.0</div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">عنوان</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="modalContent">محتوى</div>
   </div>
 </div>
 
 <script>
-// Navbar scroll effect
-window.addEventListener('scroll', function() {
-  const navbar = document.getElementById('navbar');
-  if (window.scrollY > 50) { navbar.classList.add('scrolled'); }
-  else { navbar.classList.remove('scrolled'); }
-});
-
-// Auth Modal Functions
-function openAuth(type) {
-  document.getElementById('authOverlay').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  if (type === 'guest') { enterAsGuest(); }
-  else if (type === 'register') { switchAuthTab('register'); }
-  else { switchAuthTab('login'); }
+// ======================
+// NAVIGATION
+// ======================
+function navigateTo(page, element) {
+  document.querySelectorAll('.menu li').forEach(li => li.classList.remove('active'));
+  element.classList.add('active');
+  const titles = {
+    'dashboard': { title: 'لوحة التحكم', subtitle: 'نظرة عامة على أداء التدقيق الداخلي' },
+    'annual-plan': { title: 'الخطة السنوية للتدقيق', subtitle: 'Annual Audit Plan Management' },
+    'engagements': { title: 'مهام التدقيق', subtitle: 'Audit Engagements Management' },
+    'risk-register': { title: 'سجل المخاطر', subtitle: 'Risk Register & Assessment' },
+    'findings': { title: 'الملاحظات والتوصيات', subtitle: 'Findings & Recommendations' },
+    'corrective': { title: 'متابعة الإجراءات التصحيحية', subtitle: 'Corrective Action Tracking' },
+    'reports': { title: 'التقارير', subtitle: 'Audit Reports Center' },
+    'evidence': { title: 'مركز الأدلة', subtitle: 'Evidence Management' },
+    'academy': { title: 'أكاديمية التدقيق', subtitle: 'Audit Academy & Training' },
+    'settings': { title: 'الإعدادات', subtitle: 'System Settings' }
+  };
+  if (titles[page]) {
+    document.getElementById('pageTitle').textContent = titles[page].title;
+    document.getElementById('pageSubtitle').textContent = titles[page].subtitle;
+  }
+  console.log('Navigating to:', page);
+  if (window.innerWidth <= 1024) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
 }
 
-function closeAuth(event) {
-  if (!event || event.target === document.getElementById('authOverlay')) {
-    document.getElementById('authOverlay').classList.remove('active');
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function toggleSidebarCollapse() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+let lightMode = false;
+function toggleLightMode() {
+  lightMode = !lightMode;
+  console.log('Light mode toggle:', lightMode);
+}
+
+// ======================
+// CHARTS
+// ======================
+let progressChart;
+
+function initCharts() {
+  // Progress Doughnut Chart
+  const ctx = document.getElementById('progressChart').getContext('2d');
+  progressChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['مكتمل', 'قيد التنفيذ', 'متأخر', 'ملغى'],
+      datasets: [{
+        data: [76, 14, 6, 4],
+        backgroundColor: ['#2563eb', '#22c55e', '#f59e0b', '#9ca3af'],
+        borderWidth: 0,
+        cutout: '72%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.label + ': ' + context.parsed + '%';
+            }
+          }
+        }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const labels = ['completed', 'in-progress', 'overdue', 'cancelled'];
+          filterByStatus(labels[elements[0].index]);
+        }
+      }
+    }
+  });
+
+  // Center text plugin
+  Chart.register({
+    id: 'centerText',
+    beforeDraw: function(chart) {
+      if (chart.canvas.id === 'progressChart') {
+        const ctx = chart.ctx;
+        const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+        const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+        ctx.save();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = 'bold 22px "Segoe UI"'; ctx.fillStyle = '#1e293b';
+        ctx.fillText('76%', centerX, centerY - 6);
+        ctx.font = '11px "Segoe UI"'; ctx.fillStyle = '#64748b';
+        ctx.fillText('إجمالي التقدم', centerX, centerY + 12);
+        ctx.fillText('Overall Progress', centerX, centerY + 24);
+        ctx.restore();
+      }
+    }
+  });
+
+  // Knowledge Gauge
+  drawKnowledgeGauge();
+}
+
+function drawKnowledgeGauge() {
+  const canvas = document.getElementById('knowledgeGauge');
+  const ctx = canvas.getContext('2d');
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height - 10;
+  const radius = 55;
+  const startAngle = Math.PI;
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, startAngle, 2 * Math.PI);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Progress arc (84%)
+  const progressAngle = startAngle + (84 / 100) * Math.PI;
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  gradient.addColorStop(0, '#22c55e');
+  gradient.addColorStop(1, '#3b82f6');
+
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, startAngle, progressAngle);
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = gradient;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+}
+
+// ======================
+// ACTION HANDLERS
+// ======================
+function openPage(page) {
+  console.log('Opening page:', page);
+  showModal('تنبيه', 'سيتم فتح صفحة: ' + page + '<br><strong>← اربط هذه الدالة بالتوجيه الفعلي</strong>');
+}
+
+function filterByStatus(status) {
+  console.log('Filter by status:', status);
+  showModal('تصفية', 'تصفية حسب: ' + status + '<br><strong>← اربط هذه الدالة بـ API</strong>');
+}
+
+function openAIAssistant() {
+  showModal('AI Assistant', 'المساعد الذكي<br><strong>← اربط هذه الدالة بـ AI API</strong>');
+}
+
+function openAuditAcademy() {
+  navigateTo('academy', document.querySelector('[data-page="academy"]'));
+}
+
+function toggleLanguage() {
+  showModal('تبديل اللغة', 'سيتم تبديل اللغة بين العربية والإنجليزية<br><strong>← اربط هذه الدالة بنظام الترجمة</strong>');
+}
+
+function showNotifications() {
+  showModal('الإشعارات', 'عرض جميع الإشعارات<br><strong>← اربط هذه الدالة بلوحة الإشعارات</strong>');
+}
+
+function showHelp() {
+  showModal('المساعدة', 'مركز المساعدة<br><strong>← اربط هذه الدالة بمركز المساعدة</strong>');
+}
+
+function showProfile() {
+  showModal('الملف الشخصي', 'عرض الملف الشخصي<br><strong>← اربط هذه الدالة بصفحة الملف الشخصي</strong>');
+}
+
+function handleSearch(event) {
+  if (event.key === 'Enter') {
+    const query = event.target.value;
+    console.log('Search:', query);
+    showModal('بحث', 'البحث عن: ' + query + '<br><strong>← اربط هذه الدالة بمحرك البحث</strong>');
+  }
+}
+
+function viewAllTasks() {
+  navigateTo('engagements', document.querySelector('[data-page="engagements"]'));
+}
+
+function openTask(taskId) {
+  console.log('Open task:', taskId);
+  showModal('مهمة', 'فتح مهمة: ' + taskId + '<br><strong>← اربط هذه الدالة بعرض المهمة</strong>');
+}
+
+function viewAllAttention() {
+  showModal('يحتاج اهتماماً', 'عرض جميع العناصر التي تحتاج اهتماماً<br><strong>← اربط هذه الدالة بصفحة الاهتمام</strong>');
+}
+
+function openAttention(type) {
+  console.log('Open attention:', type);
+  showModal('اهتمام', 'فتح: ' + type + '<br><strong>← اربط هذه الدالة بعرض التفاصيل</strong>');
+}
+
+function viewReport() {
+  showModal('التقرير', 'عرض التقرير الكامل<br><strong>← اربط هذه الدالة بتقرير التقدم</strong>');
+}
+
+function viewAllReports() {
+  navigateTo('reports', document.querySelector('[data-page="reports"]'));
+}
+
+function openReport(reportId) {
+  console.log('Open report:', reportId);
+  showModal('تقرير', 'فتح تقرير: ' + reportId + '<br><strong>← اربط هذه الدالة بعرض التقرير</strong>');
+}
+
+function quickAction(action) {
+  console.log('Quick action:', action);
+  const actions = {
+    'new-engagement': 'إنشاء مهمة تدقيق جديدة',
+    'new-report': 'إنشاء تقرير جديد',
+    'add-finding': 'إضافة ملاحظة جديدة',
+    'upload-evidence': 'رفع دليل جديد',
+    'followup-action': 'متابعة إجراء تصحيحي'
+  };
+  showModal('إجراء سريع', actions[action] + '<br><strong>← اربط هذه الدالة بنموذج الإدخال</strong>');
+}
+
+function goToAcademy() {
+  navigateTo('academy', document.querySelector('[data-page="academy"]'));
+}
+
+// ======================
+// MODAL SYSTEM
+// ======================
+function showModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal(event) {
+  if (!event || event.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+}
+
+// ======================
+// INIT
+// ======================
+document.addEventListener('DOMContentLoaded', function() {
+  initCharts();
+});
+
+
+// ======================
+// AUDIT REPORT FUNCTIONS
+// ======================
+function openReportModal() {
+  document.getElementById('reportModalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReportModal(event) {
+  if (!event || event.target === document.getElementById('reportModalOverlay')) {
+    document.getElementById('reportModalOverlay').classList.remove('active');
     document.body.style.overflow = '';
   }
 }
 
-function switchAuthTab(tab) {
-  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-  document.getElementById('forgotForm').style.display = 'none';
-  document.getElementById('verifyMessage').classList.remove('active');
-}
-
-function showForgotPassword() {
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('registerForm').style.display = 'none';
-  document.getElementById('forgotForm').style.display = 'block';
-}
-
-function handleLogin(event) {
+function saveAuditReport(event) {
   event.preventDefault();
-  // حفظ جلسة المستخدم
-  const session = {
-    username: "admin",
-    name: "أحمد الشمري",
-    role: "admin",
-    loginTime: new Date().toISOString()
+
+  const session = JSON.parse(localStorage.getItem("auditSession"));
+  if (session && session.role === "guest") {
+    showModal('تنبيه', 'الزائر لا يمكنه حفظ التقارير. يرجى تسجيل الدخول.');
+    return;
+  }
+
+  const report = {
+    id: "AR-" + Date.now(),
+    auditNumber: document.getElementById("auditNumber").value,
+    title: document.getElementById("auditTitle").value,
+    department: document.getElementById("auditDepartment").value,
+    auditPeriod: document.getElementById("auditPeriod").value,
+    auditor: document.getElementById("auditor").value,
+    reviewer: document.getElementById("reviewer").value,
+    reportDate: document.getElementById("reportDate").value,
+    auditObjective: document.getElementById("auditObjective").value,
+    scope: document.getElementById("auditScope").value,
+    observation: document.getElementById("condition").value,
+    rootCause: document.getElementById("rootCause").value,
+    recommendation: document.getElementById("recommendation").value,
+    overallConclusion: document.getElementById("overallConclusion").value,
+    status: document.getElementById("status").value || "Draft",
+    createdAt: new Date().toISOString(),
+    createdBy: session?.username || "unknown"
   };
-  localStorage.setItem("auditSession", JSON.stringify(session));
-  window.location.href = "dashboard.html";
+
+  let reports = JSON.parse(localStorage.getItem("auditReports")) || [];
+  reports.push(report);
+  localStorage.setItem("auditReports", JSON.stringify(reports));
+
+  alert("تم حفظ التقرير بنجاح!");
+  closeReportModal();
+  updateDashboard();
 }
 
-function handleRegister(event) {
-  event.preventDefault();
-  document.getElementById('registerForm').style.display = 'none';
-  document.getElementById('verifyMessage').classList.add('active');
+function updateDashboard() {
+  let reports = JSON.parse(localStorage.getItem("auditReports")) || [];
+
+  // Update KPIs
+  const openCount = reports.filter(r => r.status === "Open" || r.status === "In Progress").length;
+  const overdueCount = reports.filter(r => r.status === "Overdue").length;
+  const highRiskCount = reports.filter(r => r.riskRating === "Critical" || r.riskRating === "High").length;
+
+  const kpiOpen = document.getElementById("kpiOpenEngagements");
+  const kpiOverdue = document.getElementById("kpiOverdue");
+  const kpiHighRisk = document.getElementById("kpiHighRisks");
+  const attentionOverdue = document.getElementById("attentionOverdue");
+
+  if (kpiOpen) kpiOpen.textContent = openCount;
+  if (kpiOverdue) kpiOverdue.textContent = overdueCount;
+  if (kpiHighRisk) kpiHighRisk.textContent = highRiskCount;
+  if (attentionOverdue) attentionOverdue.textContent = overdueCount;
+
+  // Update recent reports list
+  const recentReportsList = document.getElementById("recentReportsList");
+  if (recentReportsList && reports.length > 0) {
+    let html = "";
+    reports.slice(-3).reverse().forEach(function(r) {
+      const statusClass = r.status === "Closed" ? "status-completed" : "status-progress";
+      const statusText = r.status === "Closed" ? "مكتمل" : (r.status === "Open" ? "مفتوح" : "قيد التنفيذ");
+      const iconColor = r.status === "Closed" ? "green" : "orange";
+      html += `
+      <li onclick="openReport('${r.id}')">
+        <div class="report-icon ${iconColor}"><i class="fas fa-file-alt"></i></div>
+        <div class="report-info"><div class="title">${r.title || "Untitled"}</div><div class="subtitle">${r.department || "N/A"}</div></div>
+        <div class="report-meta"><div class="date">${r.reportDate || "N/A"}</div><span class="status-badge ${statusClass}">${statusText}</span></div>
+      </li>
+      `;
+    });
+    recentReportsList.innerHTML = html;
+  }
 }
 
-function handleForgotPassword(event) {
-  event.preventDefault();
-  alert('تم إرسال رابط الاستعادة');
-}
+// Override quickAction to handle new-report
+const originalQuickAction = quickAction;
+quickAction = function(action) {
+  if (action === 'new-report') {
+    const session = JSON.parse(localStorage.getItem("auditSession"));
+    if (session && session.role === "guest") {
+      showModal('تنبيه', 'الزائر لا يمكنه إنشاء تقارير. يرجى تسجيل الدخول.');
+      return;
+    }
+    openReportModal();
+    return;
+  }
+  originalQuickAction(action);
+};
 
-function socialLogin(provider) {
-  alert('تسجيل الدخول عبر ' + provider);
-}
+// Update date on load
+const originalInit = initCharts;
+initCharts = function() {
+  originalInit();
+  updateDashboard();
 
-function enterAsGuest() {
-  const session = {
-    username: "guest",
-    name: "Guest User",
-    role: "guest",
-    loginTime: new Date().toISOString()
-  };
-  localStorage.setItem("auditSession", JSON.stringify(session));
-  window.location.href = "dashboard.html";
-}
+  // Update dates
+  const now = new Date();
+  const dateAr = document.getElementById('dateAr');
+  const dateEn = document.getElementById('dateEn');
+  const footerDate = document.getElementById('footerDate');
 
-function toggleMobileMenu() {
-  alert('قائمة الجوال');
-}
-
-// Smooth scroll for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
+  if (dateAr) dateAr.textContent = now.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  if (dateEn) dateEn.textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  if (footerDate) footerDate.textContent = now.toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' });
+};
 </script>
+
+
+
+<!-- Report Creation Modal -->
+<div class="modal-overlay" id="reportModalOverlay" onclick="closeReportModal(event)">
+  <div class="modal" style="max-width: 900px; width: 95%;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>إنشاء تقرير تدقيق جديد</h3>
+      <button class="modal-close" onclick="closeReportModal()">&times;</button>
+    </div>
+    <div id="modalContent">
+      <form onsubmit="saveAuditReport(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">رقم التدقيق</label>
+            <input type="text" id="auditNumber" class="form-input" placeholder="AUD-2026-001" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">عنوان التقرير</label>
+            <input type="text" id="auditTitle" class="form-input" placeholder="تقرير تدقيق المشتريات" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الإدارة / الجهة</label>
+            <input type="text" id="auditDepartment" class="form-input" placeholder="إدارة المشتريات">
+          </div>
+          <div class="form-group">
+            <label class="form-label">فترة التدقيق</label>
+            <input type="text" id="auditPeriod" class="form-input" placeholder="يناير - يونيو 2026">
+          </div>
+          <div class="form-group">
+            <label class="form-label">المدقق</label>
+            <input type="text" id="auditor" class="form-input" placeholder="اسم المدقق">
+          </div>
+          <div class="form-group">
+            <label class="form-label">المراجع</label>
+            <input type="text" id="reviewer" class="form-input" placeholder="اسم المراجع">
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ التقرير</label>
+            <input type="date" id="reportDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الحالة</label>
+            <select id="status" class="form-input" style="cursor: pointer;">
+              <option value="Draft">مسودة</option>
+              <option value="Open">مفتوح</option>
+              <option value="In Progress">قيد التنفيذ</option>
+              <option value="Closed">مغلق</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">هدف التدقيق</label>
+          <textarea id="auditObjective" class="form-input" rows="3" placeholder="وصف هدف التدقيق..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">نطاق التدقيق</label>
+          <textarea id="auditScope" class="form-input" rows="3" placeholder="وصف نطاق التدقيق..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">الملاحظة / Condition</label>
+          <textarea id="condition" class="form-input" rows="3" placeholder="وصف الملاحظة..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">السبب الجذري / Root Cause</label>
+          <textarea id="rootCause" class="form-input" rows="3" placeholder="تحليل السبب الجذري..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">التوصية / Recommendation</label>
+          <textarea id="recommendation" class="form-input" rows="3" placeholder="التوصية المقترحة..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">الخلاصة العامة / Overall Conclusion</label>
+          <textarea id="overallConclusion" class="form-input" rows="3" placeholder="الخلاصة العامة للتقرير..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">
+            <i class="fas fa-save"></i> حفظ التقرير
+          </button>
+          <button type="button" class="btn btn-ghost" onclick="closeReportModal()" style="flex: 1;">
+            <i class="fas fa-times"></i> إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
