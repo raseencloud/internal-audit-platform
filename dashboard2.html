@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="IA Platform - Internal Audit Excellence Dashboard">
+  <meta name="author" content="IA Platform Team">
+  <meta name="version" content="2.0.0">
+
+  <title>IA Platform – Internal Audit Excellence</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='65' text-anchor='middle' fill='white' font-size='50' font-weight='bold'%3EIA%3C/text%3E%3C/svg%3E">
+
+  <!-- External Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="dashboard-styles.css">
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<base target="_blank">
+</head>
+<body>
+
+  <!-- Guest Banner -->
+  <div class="guest-banner" id="guestBanner" role="alert" aria-live="polite">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>أنت في وضع الزائر. بعض الميزات محدودة.</span>
+    <a href="index.html">تسجيل الدخول للوصول الكامل</a>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="القائمة الرئيسية">
+
+      <!-- Sidebar Header / Brand -->
+      <div class="sidebar-header">
+        <div class="sidebar-logo" aria-label="IA Platform Logo">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="sidebar-brand">
+          <h2>IA PLATFORM</h2>
+          <span>Internal Audit Excellence</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <ul class="menu" id="mainMenu" role="menubar">
+        <li class="active" data-page="dashboard" onclick="app.navigateTo('dashboard', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-home" aria-hidden="true"></i>
+          <span>
+            لوحة التحكم
+            <small>Dashboard</small>
+          </span>
+        </li>
+        <li data-page="annual-plan" onclick="app.navigateTo('annual-plan', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+          <span>
+            الخطة السنوية للتدقيق
+            <small>Annual Audit Plan</small>
+          </span>
+        </li>
+        <li data-page="engagements" onclick="app.navigateTo('engagements', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+          <span>
+            مهام التدقيق
+            <small>Audit Engagements</small>
+          </span>
+        </li>
+        <li data-page="risk-register" onclick="app.navigateTo('risk-register', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-shield-alt" aria-hidden="true"></i>
+          <span>
+            سجل المخاطر
+            <small>Risk Register</small>
+          </span>
+        </li>
+        <li data-page="findings" onclick="app.navigateTo('findings', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+          <span>
+            الملاحظات والتوصيات
+            <small>Findings & Recommendations</small>
+          </span>
+        </li>
+        <li data-page="corrective" onclick="app.navigateTo('corrective', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-check-circle" aria-hidden="true"></i>
+          <span>
+            متابعة الإجراءات التصحيحية
+            <small>Corrective Action Tracking</small>
+          </span>
+        </li>
+        <li data-page="reports" onclick="app.navigateTo('reports', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-file-alt" aria-hidden="true"></i>
+          <span>
+            التقارير
+            <small>Reports</small>
+          </span>
+        </li>
+        <li data-page="evidence" onclick="app.navigateTo('evidence', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-folder-open" aria-hidden="true"></i>
+          <span>
+            مركز الأدلة
+            <small>Evidence Center</small>
+          </span>
+        </li>
+        <li data-page="academy" onclick="app.navigateTo('academy', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+          <span>
+            أكاديمية التدقيق
+            <small>Audit Academy</small>
+          </span>
+        </li>
+        <li data-page="settings" onclick="app.navigateTo('settings', this)" role="menuitem" tabindex="0">
+          <i class="fas fa-cog" aria-hidden="true"></i>
+          <span>
+            الإعدادات
+            <small>Settings</small>
+          </span>
+        </li>
+      </ul>
+
+      <!-- Sidebar Bottom Actions -->
+      <div class="sidebar-bottom">
+        <div class="sidebar-bottom-item" onclick="app.settings.toggleSidebar()" role="button" tabindex="0">
+          <i class="fas fa-angle-double-right" aria-hidden="true"></i>
+          <span>
+            طي القائمة
+            <small>Collapse</small>
+          </span>
+        </div>
+        <div class="sidebar-bottom-item" onclick="app.settings.toggleTheme()" role="button" tabindex="0">
+          <i class="fas fa-sun" aria-hidden="true"></i>
+          <span>
+            تبديل الوضع
+            <small>Toggle Theme</small>
+          </span>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer / User Info -->
+      <div class="sidebar-footer">
+        <div class="avatar" aria-label="صورة المستخدم">أ</div>
+        <div>
+          <div class="user-name" style="color:#f8fafc; font-weight:500;">أحمد الشمري</div>
+          <div class="user-role" style="font-size:10px; color:#94a3b8;">Chief Audit Executive</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main" role="main">
+
+      <!-- Top Navigation Bar -->
+      <header class="top-bar" role="banner">
+        <div class="top-bar-left">
+          <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="فتح/إغلاق القائمة" type="button">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+
+          <div class="search-box">
+            <input 
+              type="text" 
+              placeholder="بحث سريع / Search..." 
+              id="globalSearch" 
+              aria-label="البحث"
+              autocomplete="off"
+            >
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="search-shortcut">Ctrl + K</span>
+          </div>
+        </div>
+
+        <div class="top-bar-right">
+          <button class="top-btn" onclick="app.openAIAssistant()" type="button">
+            <i class="fas fa-robot" aria-hidden="true"></i>
+            <div class="label">
+              <span>AI Assistant</span>
+              <small>المساعد الذكي</small>
+            </div>
+          </button>
+
+          <button class="top-btn" onclick="app.openAuditAcademy()" type="button">
+            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+            <div class="label">
+              <span>Audit Academy</span>
+              <small>أكاديمية التدقيق</small>
+            </div>
+          </button>
+
+          <div class="top-icon" data-tooltip="الإشعارات" onclick="app.showNotifications()" role="button" tabindex="0" aria-label="الإشعارات">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+            <span class="badge-count" aria-label="5 إشعارات جديدة">5</span>
+          </div>
+
+          <div class="lang-switch" onclick="app.settings.toggleLanguage()" role="button" tabindex="0" aria-label="تبديل اللغة">
+            <i class="fas fa-globe" aria-hidden="true"></i>
+            <div>
+              <div>العربية</div>
+              <div style="font-size:10px; color:var(--text-muted);">English</div>
+            </div>
+          </div>
+
+          <div class="user-profile" onclick="app.showProfile()" role="button" tabindex="0" aria-label="الملف الشخصي">
+            <div class="avatar">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23475569' rx='18'/%3E%3Ctext x='18' y='22' text-anchor='middle' fill='white' font-size='14' font-weight='bold'%3Eأ%3C/text%3E%3C/svg%3E" alt="صورة المستخدم">
+            </div>
+            <div class="user-info">
+              <div class="name">أحمد الشمري</div>
+              <div class="role">مدير التدقيق الداخلي · Chief Audit Executive</div>
+            </div>
+            <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;" aria-hidden="true"></i>
+          </div>
+
+          <button class="top-btn" id="logoutBtn" style="color: var(--danger);" type="button">
+            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+            <div class="label">
+              <span>خروج</span>
+              <small>Logout</small>
+            </div>
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <div class="content" id="mainContent">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 id="pageTitle">لوحة التحكم</h1>
+          <p id="pageSubtitle">نظرة عامة على أداء التدقيق الداخلي</p>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+          <div class="welcome-text">
+            <h2>مرحباً أحمد 👋</h2>
+            <p>Welcome back, Ahmed</p>
+          </div>
+          <div class="date-display" role="group" aria-label="التاريخ الحالي">
+            <i class="far fa-calendar-alt" aria-hidden="true"></i>
+            <div class="date-text">
+              <div class="ar">الأحد، 1 يونيو 2026</div>
+              <div class="en">Sunday, 1 June 2026</div>
+            </div>
+            <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size:12px;" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <!-- KPI Section -->
+        <div class="section-title">
+          نظرة عامة على الأداء
+          <small>Performance Overview</small>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid" role="region" aria-label="مؤشرات الأداء الرئيسية">
+
+          <!-- Plan Progress -->
+          <div class="kpi-card" onclick="app.filterByStatus('plan-progress')" data-tooltip="عرض تفاصيل الخطة" role="button" tabindex="0">
+            <div class="kpi-card-inner">
+              <div class="kpi-icon blue">
+                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+              </div>
+              <div class="kpi-content">
+                <div class="kpi-value" style="color:var(--primary);" data-kpi="plan-progress">76%</div>
+                <div class="kpi-label">تنفيذ الخطة السنوية</div>
+                <div class="kpi-label-en">Audit Plan Progress</div>
+              </div>
+            </div>
+            <div class="kpi-progress">
+              <div class="kpi-progress-bar" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100">
+                <div class="kpi-progress-fill" style="width:76%; background:var(--primary);"></div>
+              </div>
+              <div class="kpi-progress-text">100% من 100%</div>
+            </div>
+          </div>
+
+          <!-- Open Engagements -->
+          <div class="kpi-card" onclick="app.filterByStatus('open')" data-tooltip="عرض المهام المفتوحة" role="button" tabindex="0">
+            <div class="kpi-card-inner">
+              <div class="kpi-icon green">
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+              </div>
+              <div class="kpi-content">
+                <div class="kpi-value" style="color:var(--success);" data-kpi="open">18</div>
+                <div class="kpi-label">المهام المفتوحة</div>
+                <div class="kpi-label-en">Open Engagements</div>
+              </div>
+            </div>
+            <div class="kpi-progress">
+              <div class="kpi-progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                <div class="kpi-progress-fill" style="width:75%; background:var(--success);"></div>
+              </div>
+              <div class="kpi-progress-text">إجمالي 24 من Total</div>
+            </div>
+          </div>
+
+          <!-- Overdue Engagements -->
+          <div class="kpi-card" onclick="app.filterByStatus('overdue')" data-tooltip="عرض المهام المتأخرة" role="button" tabindex="0">
+            <div class="kpi-card-inner">
+              <div class="kpi-icon orange">
+                <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+              </div>
+              <div class="kpi-content">
+                <div class="kpi-value" style="color:var(--warning);" data-kpi="overdue">6</div>
+                <div class="kpi-label">المهام المتأخرة</div>
+                <div class="kpi-label-en">Overdue Engagements</div>
+              </div>
+            </div>
+            <div class="kpi-progress">
+              <div class="kpi-progress-bar" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                <div class="kpi-progress-fill" style="width:25%; background:var(--warning);"></div>
+              </div>
+              <div class="kpi-progress-text">إجمالي 24 من Total</div>
+            </div>
+          </div>
+
+          <!-- High Risks -->
+          <div class="kpi-card" onclick="app.filterByStatus('high-risk')" data-tooltip="عرض المخاطر العالية" role="button" tabindex="0">
+            <div class="kpi-card-inner">
+              <div class="kpi-icon red">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+              </div>
+              <div class="kpi-content">
+                <div class="kpi-value" style="color:var(--danger);" data-kpi="high-risk">7</div>
+                <div class="kpi-label">المخاطر العالية</div>
+                <div class="kpi-label-en">High Risks</div>
+              </div>
+            </div>
+            <div class="kpi-progress">
+              <div class="kpi-progress-bar" role="progressbar" aria-valuenow="17" aria-valuemin="0" aria-valuemax="100">
+                <div class="kpi-progress-fill" style="width:17%; background:var(--danger);"></div>
+              </div>
+              <div class="kpi-progress-text">إجمالي 42 من Total</div>
+            </div>
+          </div>
+
+          <!-- Recommendations Implementation -->
+          <div class="kpi-card" onclick="app.navigateTo('findings', document.querySelector('[data-page=\'findings\']'))" data-tooltip="عرض نسبة التنفيذ" role="button" tabindex="0">
+            <div class="kpi-card-inner">
+              <div class="kpi-icon purple">
+                <i class="fas fa-chart-line" aria-hidden="true"></i>
+              </div>
+              <div class="kpi-content">
+                <div class="kpi-value" style="color:#9333ea;">82%</div>
+                <div class="kpi-label">تنفيذ التوصيات</div>
+                <div class="kpi-label-en">Recommendations Implementation</div>
+              </div>
+            </div>
+            <div class="kpi-progress">
+              <div class="kpi-progress-bar" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100">
+                <div class="kpi-progress-fill" style="width:82%; background:#9333ea;"></div>
+              </div>
+              <div class="kpi-progress-text">100% من 100%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Grid: Tasks + Attention + Progress/Reports -->
+        <div class="section-grid-3">
+
+          <!-- Today's Tasks -->
+          <div class="card" role="region" aria-label="مهام اليوم">
+            <div class="card-header">
+              <div>
+                <h3>مهامي اليوم</h3>
+                <span class="subtitle">My Today</span>
+              </div>
+              <a href="#" onclick="app.viewAllTasks(); return false;" aria-label="عرض جميع المهام">
+                عرض الكل <i class="fas fa-arrow-left" aria-hidden="true"></i>
+              </a>
+            </div>
+            <ul class="tasks-list" role="list">
+              <li onclick="app.openTask('procurement-review')" role="listitem" tabindex="0">
+                <div class="task-time">
+                  <div class="time">09:00</div>
+                  <div class="day">اليوم</div>
+                </div>
+                <div class="task-icon blue">
+                  <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                </div>
+                <div class="task-info">
+                  <div class="title">مراجعة عمليات المشتريات</div>
+                  <div class="subtitle">Review Procurement Process</div>
+                </div>
+                <span class="task-badge badge-review">مراجعة</span>
+                <span class="task-code">ENG-2026-015</span>
+                <i class="fas fa-chevron-left task-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openTask('inventory-approval')" role="listitem" tabindex="0">
+                <div class="task-time">
+                  <div class="time">11:00</div>
+                  <div class="day">اليوم</div>
+                </div>
+                <div class="task-icon green">
+                  <i class="fas fa-check-circle" aria-hidden="true"></i>
+                </div>
+                <div class="task-info">
+                  <div class="title">اعتماد تقرير المخزون</div>
+                  <div class="subtitle">Approve Inventory Report</div>
+                </div>
+                <span class="task-badge badge-approval">اعتماد</span>
+                <span class="task-code">ENG-2026-008</span>
+                <i class="fas fa-chevron-left task-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openTask('upload-evidence')" role="listitem" tabindex="0">
+                <div class="task-time">
+                  <div class="time">14:00</div>
+                  <div class="day">اليوم</div>
+                </div>
+                <div class="task-icon orange">
+                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                </div>
+                <div class="task-info">
+                  <div class="title">رفع الأدلة المطلوبة</div>
+                  <div class="subtitle">Upload Required Evidence</div>
+                </div>
+                <span class="task-badge badge-evidence">أدلة</span>
+                <span class="task-code">ENG-2026-023</span>
+                <i class="fas fa-chevron-left task-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openTask('finance-meeting')" role="listitem" tabindex="0">
+                <div class="task-time">
+                  <div class="time">15:30</div>
+                  <div class="day">اليوم</div>
+                </div>
+                <div class="task-icon purple">
+                  <i class="fas fa-users" aria-hidden="true"></i>
+                </div>
+                <div class="task-info">
+                  <div class="title">اجتماع مع إدارة المالية</div>
+                  <div class="subtitle">Meeting with Finance Dept.</div>
+                </div>
+                <span class="task-badge badge-meeting">اجتماع</span>
+                <span class="task-code">ENG-2026-011</span>
+                <i class="fas fa-chevron-left task-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openTask('corrective-review')" role="listitem" tabindex="0">
+                <div class="task-time">
+                  <div class="time">16:30</div>
+                  <div class="day">اليوم</div>
+                </div>
+                <div class="task-icon teal">
+                  <i class="fas fa-tasks" aria-hidden="true"></i>
+                </div>
+                <div class="task-info">
+                  <div class="title">مراجعة إجراء تصحيحي</div>
+                  <div class="subtitle">Review Corrective Action</div>
+                </div>
+                <span class="task-badge badge-followup">متابعة</span>
+                <span class="task-code">CAP-2026-004</span>
+                <i class="fas fa-chevron-left task-arrow" aria-hidden="true"></i>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Needs Attention -->
+          <div class="card" role="region" aria-label="يحتاج اهتماماً">
+            <div class="card-header">
+              <div>
+                <h3>يحتاج اهتماماً</h3>
+                <span class="subtitle">Needs Attention</span>
+              </div>
+              <a href="#" onclick="app.viewAllAttention(); return false;" aria-label="عرض جميع العناصر">
+                عرض الكل <i class="fas fa-arrow-left" aria-hidden="true"></i>
+              </a>
+            </div>
+            <ul class="attention-list" role="list">
+              <li onclick="app.openAttention('high-risks')" role="listitem" tabindex="0">
+                <div class="attention-icon red">
+                  <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                </div>
+                <div class="attention-info">
+                  <div class="title">مخاطر عالية</div>
+                  <div class="subtitle">High Risks</div>
+                </div>
+                <div class="attention-count">7</div>
+                <i class="fas fa-chevron-left attention-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openAttention('overdue')" role="listitem" tabindex="0">
+                <div class="attention-icon orange">
+                  <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                </div>
+                <div class="attention-info">
+                  <div class="title">مهام متأخرة</div>
+                  <div class="subtitle">Overdue Engagements</div>
+                </div>
+                <div class="attention-count" style="color:var(--warning);">6</div>
+                <i class="fas fa-chevron-left attention-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openAttention('missing-evidence')" role="listitem" tabindex="0">
+                <div class="attention-icon yellow">
+                  <i class="fas fa-folder-open" aria-hidden="true"></i>
+                </div>
+                <div class="attention-info">
+                  <div class="title">أدلة مفقودة</div>
+                  <div class="subtitle">Missing Evidence</div>
+                </div>
+                <div class="attention-count" style="color:var(--warning);">9</div>
+                <i class="fas fa-chevron-left attention-arrow" aria-hidden="true"></i>
+              </li>
+
+              <li onclick="app.openAttention('pending-approvals')" role="listitem" tabindex="0">
+                <div class="attention-icon blue">
+                  <i class="fas fa-clock" aria-hidden="true"></i>
+                </div>
+                <div class="attention-info">
+                  <div class="title">اعتمادات معلقة</div>
+                  <div class="subtitle">Pending Approvals</div>
+                </div>
+                <div class="attention-count" style="color:var(--primary);">4</div>
+                <i class="fas fa-chevron-left attention-arrow" aria-hidden="true"></i>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Column: Progress + Reports -->
+          <div>
+            <!-- Overall Progress -->
+            <div class="card" style="margin-bottom:16px;" role="region" aria-label="التقدم العام">
+              <div class="card-header">
+                <div>
+                  <h3>التقدم العام</h3>
+                  <span class="subtitle">Overall Progress</span>
+                </div>
+                <a href="#" onclick="app.viewReport(); return false;" aria-label="عرض التقرير الكامل">
+                  عرض التقرير <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                </a>
+              </div>
+              <div class="progress-chart-wrapper">
+                <div class="progress-chart-container">
+                  <canvas id="progressChart" aria-label="رسم بياني للتقدم العام" role="img"></canvas>
+                </div>
+                <div class="progress-legend">
+                  <div class="progress-legend-item">
+                    <div class="progress-legend-dot" style="background:#2563eb;"></div>
+                    <div class="progress-legend-info">
+                      <div class="label">مكتمل</div>
+                      <div class="label-en">Completed</div>
+                    </div>
+                    <div class="progress-legend-value">76%</div>
+                  </div>
+                  <div class="progress-legend-item">
+                    <div class="progress-legend-dot" style="background:#22c55e;"></div>
+                    <div class="progress-legend-info">
+                      <div class="label">قيد التنفيذ</div>
+                      <div class="label-en">In Progress</div>
+                    </div>
+                    <div class="progress-legend-value">14%</div>
+                  </div>
+                  <div class="progress-legend-item">
+                    <div class="progress-legend-dot" style="background:#f59e0b;"></div>
+                    <div class="progress-legend-info">
+                      <div class="label">متأخر</div>
+                      <div class="label-en">Overdue</div>
+                    </div>
+                    <div class="progress-legend-value">6%</div>
+                  </div>
+                  <div class="progress-legend-item">
+                    <div class="progress-legend-dot" style="background:#9ca3af;"></div>
+                    <div class="progress-legend-info">
+                      <div class="label">ملغى</div>
+                      <div class="label-en">Cancelled</div>
+                    </div>
+                    <div class="progress-legend-value">4%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="card" role="region" aria-label="أحدث التقارير">
+              <div class="card-header">
+                <div>
+                  <h3>أحدث التقارير</h3>
+                  <span class="subtitle">Recent Reports</span>
+                </div>
+                <a href="#" onclick="app.viewAllReports(); return false;" aria-label="عرض جميع التقارير">
+                  عرض الكل <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                </a>
+              </div>
+              <ul class="reports-list" id="recentReportsList" role="list">
+                <li onclick="app.openReport('AR-2026-001')" role="listitem" tabindex="0">
+                  <div class="report-icon blue">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                  </div>
+                  <div class="report-info">
+                    <div class="title">تقرير تدقيق المشتريات</div>
+                    <div class="subtitle">Procurement Audit Report</div>
+                  </div>
+                  <div class="report-meta">
+                    <div class="date">31/05/2026</div>
+                    <span class="status-badge status-completed">مكتمل</span>
+                  </div>
+                </li>
+
+                <li onclick="app.openReport('AR-2026-002')" role="listitem" tabindex="0">
+                  <div class="report-icon green">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                  </div>
+                  <div class="report-info">
+                    <div class="title">تقرير تدقيق المخزون</div>
+                    <div class="subtitle">Inventory Audit Report</div>
+                  </div>
+                  <div class="report-meta">
+                    <div class="date">30/05/2026</div>
+                    <span class="status-badge status-completed">مكتمل</span>
+                  </div>
+                </li>
+
+                <li onclick="app.openReport('AR-2026-003')" role="listitem" tabindex="0">
+                  <div class="report-icon orange">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                  </div>
+                  <div class="report-info">
+                    <div class="title">تقرير تدقيق الموارد البشرية</div>
+                    <div class="subtitle">HR Audit Report</div>
+                  </div>
+                  <div class="report-meta">
+                    <div class="date">28/05/2026</div>
+                    <span class="status-badge status-progress">قيد التنفيذ</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Quick Actions + Knowledge Score -->
+        <div class="section-grid-2">
+
+          <!-- Quick Actions -->
+          <div class="card" role="region" aria-label="إجراءات سريعة">
+            <div class="card-header">
+              <div>
+                <h3>إجراءات سريعة</h3>
+                <span class="subtitle">Quick Actions</span>
+              </div>
+            </div>
+            <div class="quick-actions-grid">
+              <div class="quick-action-item" onclick="app.quickAction('new-engagement')" role="button" tabindex="0" data-action="new-engagement">
+                <div class="quick-icon" style="background:#dbeafe; color:var(--primary);">
+                  <i class="fas fa-plus-circle" aria-hidden="true"></i>
+                </div>
+                <div class="quick-label">
+                  مهمة تدقيق جديدة
+                  <small>New Engagement</small>
+                </div>
+              </div>
+
+              <div class="quick-action-item" onclick="app.quickAction('new-report')" role="button" tabindex="0" data-action="new-report">
+                <div class="quick-icon" style="background:#dcfce7; color:var(--success);">
+                  <i class="fas fa-file-medical" aria-hidden="true"></i>
+                </div>
+                <div class="quick-label">
+                  تقرير جديد
+                  <small>New Report</small>
+                </div>
+              </div>
+
+              <div class="quick-action-item" onclick="app.quickAction('add-finding')" role="button" tabindex="0" data-action="add-finding">
+                <div class="quick-icon" style="background:#fef3c7; color:var(--warning);">
+                  <i class="fas fa-plus-square" aria-hidden="true"></i>
+                </div>
+                <div class="quick-label">
+                  إضافة ملاحظة
+                  <small>Add Finding</small>
+                </div>
+              </div>
+
+              <div class="quick-action-item" onclick="app.quickAction('upload-evidence')" role="button" tabindex="0" data-action="upload-evidence">
+                <div class="quick-icon" style="background:#f3e8ff; color:#9333ea;">
+                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                </div>
+                <div class="quick-label">
+                  رفع دليل
+                  <small>Upload Evidence</small>
+                </div>
+              </div>
+
+              <div class="quick-action-item" onclick="app.quickAction('followup-action')" role="button" tabindex="0" data-action="followup-action">
+                <div class="quick-icon" style="background:#ccfbf1; color:#0d9488;">
+                  <i class="fas fa-check-double" aria-hidden="true"></i>
+                </div>
+                <div class="quick-label">
+                  متابعة إجراء تصحيحي
+                  <small>Follow up Action</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Knowledge Score -->
+          <div class="knowledge-card" role="region" aria-label="مؤشر المعرفة">
+            <div class="knowledge-header">
+              <div>
+                <h3>مؤشر المعرفة</h3>
+                <span class="subtitle">Knowledge Score</span>
+              </div>
+              <a href="#" onclick="app.openAuditAcademy(); return false;" aria-label="الذهاب إلى الأكاديمية">
+                عرض الأكاديمية <i class="fas fa-arrow-left" aria-hidden="true"></i>
+              </a>
+            </div>
+            <div class="knowledge-body">
+              <div>
+                <div class="gauge-container">
+                  <canvas id="knowledgeGauge" width="140" height="100" aria-label="مؤشر المعرفة 84%"></canvas>
+                  <div class="gauge-value">
+                    <div class="percent">84%</div>
+                    <div class="label">إجمالي التقدم</div>
+                  </div>
+                </div>
+                <div class="gauge-stars" aria-label="4 من 5 نجوم">
+                  <i class="fas fa-star" aria-hidden="true"></i>
+                  <i class="fas fa-star" aria-hidden="true"></i>
+                  <i class="fas fa-star" aria-hidden="true"></i>
+                  <i class="fas fa-star" aria-hidden="true"></i>
+                  <i class="far fa-star" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div class="knowledge-stats">
+                <div class="knowledge-stat">
+                  <span class="label">المستوى الحالي</span>
+                  <span class="value">Advanced</span>
+                </div>
+                <div class="knowledge-stat">
+                  <span class="label">الاختبارات المكتملة</span>
+                  <span class="value">24 / 30</span>
+                </div>
+                <div class="knowledge-stat">
+                  <span class="label">الشهادات المتحققة</span>
+                  <span class="value">6</span>
+                </div>
+                <div class="knowledge-stat">
+                  <span class="label">النقاط</span>
+                  <span class="value">2,450</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer" role="contentinfo">
+        <div>© 2026 IA Platform. All rights reserved.</div>
+        <div class="footer-date">جميع البيانات محدثة حتى 1 يونيو 2026، 08:30 صباحاً · All data is updated till 1 June 2026, 08:30 AM</div>
+        <div>الإصدار 2.0.0 · Version 2.0.0</div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Generic Modal -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h3 id="modalTitle">عنوان</h3>
+        <button class="modal-close" onclick="app.modal.close()" aria-label="إغلاق" type="button">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div id="modalContent">محتوى</div>
+    </div>
+  </div>
+
+  <!-- Report Creation Modal -->
+  <div class="modal-overlay" id="reportModalOverlay" role="dialog" aria-modal="true" aria-hidden="true" onclick="app.closeReportModal()">
+    <div class="modal" style="max-width: 900px; width: 95%;" onclick="event.stopPropagation()" role="document">
+      <div class="modal-header">
+        <h3>إنشاء تقرير تدقيق جديد</h3>
+        <button class="modal-close" onclick="app.closeReportModal()" aria-label="إغلاق" type="button">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div>
+        <form id="reportForm" onsubmit="app.reports.saveReport(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" for="auditNumber">رقم التدقيق</label>
+              <input type="text" id="auditNumber" name="auditNumber" class="form-input" placeholder="AUD-2026-001" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="auditTitle">عنوان التقرير</label>
+              <input type="text" id="auditTitle" name="title" class="form-input" placeholder="تقرير تدقيق المشتريات" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="auditDepartment">الإدارة / الجهة</label>
+              <input type="text" id="auditDepartment" name="department" class="form-input" placeholder="إدارة المشتريات">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="auditPeriod">فترة التدقيق</label>
+              <input type="text" id="auditPeriod" name="auditPeriod" class="form-input" placeholder="يناير - يونيو 2026">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="auditor">المدقق</label>
+              <input type="text" id="auditor" name="auditor" class="form-input" placeholder="اسم المدقق">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reviewer">المراجع</label>
+              <input type="text" id="reviewer" name="reviewer" class="form-input" placeholder="اسم المراجع">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reportDate">تاريخ التقرير</label>
+              <input type="date" id="reportDate" name="reportDate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="status">الحالة</label>
+              <select id="status" name="status" class="form-input">
+                <option value="draft">مسودة</option>
+                <option value="open">مفتوح</option>
+                <option value="in-progress">قيد التنفيذ</option>
+                <option value="closed">مغلق</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="auditObjective">هدف التدقيق</label>
+            <textarea id="auditObjective" name="auditObjective" class="form-input" rows="3" placeholder="وصف هدف التدقيق..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="auditScope">نطاق التدقيق</label>
+            <textarea id="auditScope" name="scope" class="form-input" rows="3" placeholder="وصف نطاق التدقيق..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="condition">الملاحظة / Condition</label>
+            <textarea id="condition" name="observation" class="form-input" rows="3" placeholder="وصف الملاحظة..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="rootCause">السبب الجذري / Root Cause</label>
+            <textarea id="rootCause" name="rootCause" class="form-input" rows="3" placeholder="تحليل السبب الجذري..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="recommendation">التوصية / Recommendation</label>
+            <textarea id="recommendation" name="recommendation" class="form-input" rows="3" placeholder="التوصية المقترحة..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="overallConclusion">الخلاصة العامة / Overall Conclusion</label>
+            <textarea id="overallConclusion" name="conclusion" class="form-input" rows="3" placeholder="الخلاصة العامة للتقرير..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">
+              <i class="fas fa-save" aria-hidden="true"></i> حفظ التقرير
+            </button>
+            <button type="button" class="btn btn-ghost" onclick="app.closeReportModal()" style="flex: 1;">
+              <i class="fas fa-times" aria-hidden="true"></i> إلغاء
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-gVP0vL/gX62dRWnOz/0HQGgiM69qoWLqvz3YugIqH8wBhw+7LQ2aR4tD7q9C3q1z" crossorigin="anonymous"></script>
+  <script src="dashboard-app.js"></script>
+
+  <!-- Service Worker Registration (for PWA support) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Uncomment when service-worker.js is ready
+        // navigator.serviceWorker.register('service-worker.js');
+      });
+    }
+  </script>
+</body>
+</html>
