@@ -215,5 +215,24 @@
             }, 1000);
         });
     </script>
+    <script src="login-fix.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      const result = await loginHandler.handleLogin(username, password);
+      
+      if (!result.success) {
+        alert(result.error);
+      }
+    });
+  }
+});
+</script>
 </body>
 </html>
