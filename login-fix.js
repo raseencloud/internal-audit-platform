@@ -413,7 +413,7 @@ class LoginHandler {
     // ⚠️ هذا مثال فقط - في الإنتاج استخدم Backend API
     const users = [
       { username: 'admin', password: 'admin123', name: 'مدير النظام', role: 'admin' },
-      { username: 'ahmed', password: 'ahmed123', name: 'أحمد الشمري', role: 'executive' },
+      { username: 'Ibrahim', password: 'Ibrahim123', name: 'ابراهيم الشرقاوي', role: 'executive' },
       { username: 'guest', password: 'guest', name: 'زائر', role: 'guest' }
     ];
 
